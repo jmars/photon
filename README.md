@@ -5,7 +5,7 @@ pulled out for building small apps. Lua POC replaced with luajit and the cassowa
 ## TODO
 * Integrate amoeba into the lua view class
 * Add physics engine for [declarative interactions](http://iamralpht.github.io/constraints/)
-* Model layer for views with implicite dependency tracking for rerenders
+* Model layer for views with implicit dependency tracking for rerenders
 
 # lite
 ![screenshot](https://user-images.githubusercontent.com/3920290/81471642-6c165880-91ea-11ea-8cd1-fae7ae8f0bc4.png)
