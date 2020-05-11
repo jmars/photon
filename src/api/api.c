@@ -8,6 +8,7 @@ int luaopen_renderer(lua_State *L);
 static const luaL_Reg libs[] = {
   { "system",    luaopen_system     },
   { "renderer",  luaopen_renderer   },
+  { "amoeba",    luaopen_amoeba     },
   { NULL, NULL }
 };
 

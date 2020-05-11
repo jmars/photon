@@ -2,10 +2,9 @@
 #include <SDL2/SDL.h>
 #include "api/api.h"
 #include "renderer.h"
+#include "lib/amoeba/amoeba.h"
 
-#ifdef _WIN32
-  #include <windows.h>
-#elif __linux__
+#if __linux__
   #include <unistd.h>
 #elif __APPLE__
   #include <mach-o/dyld.h>
@@ -46,30 +45,7 @@ static void get_exe_filename(char *buf, int sz) {
 }
 
 
-static void init_window_icon(void) {
-#ifndef _WIN32
-  #include "../icon.inl"
-  (void) icon_rgba_len; /* unused */
-  SDL_Surface *surf = SDL_CreateRGBSurfaceFrom(
-    icon_rgba, 64, 64,
-    32, 64 * 4,
-    0x000000ff,
-    0x0000ff00,
-    0x00ff0000,
-    0xff000000);
-  SDL_SetWindowIcon(window, surf);
-  SDL_FreeSurface(surf);
-#endif
-}
-
-
 int main(int argc, char **argv) {
-#ifdef _WIN32
-  HINSTANCE lib = LoadLibrary("user32.dll");
-  int (*SetProcessDPIAware)() = (void*) GetProcAddress(lib, "SetProcessDPIAware");
-  SetProcessDPIAware();
-#endif
-
   SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
   SDL_EnableScreenSaver();
   SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
@@ -91,7 +67,6 @@ int main(int argc, char **argv) {
   lua_State *L = luaL_newstate();
   luaL_openlibs(L);
   api_load_libs(L);
-
 
   lua_newtable(L);
   for (int i = 0; i < argc; i++) {
