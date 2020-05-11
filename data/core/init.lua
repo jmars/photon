@@ -11,9 +11,11 @@ local core = {}
 function core.init()
   View = require "core.view"
 
+  -- renderer.show_debug(true)
   core.frame_start = 0
   core.clip_rect_stack = {{ 0,0,0,0 }}
   core.threads = setmetatable({}, { __mode = "k" })
+  core.solver = amoeba.new()
 
   core.root_view = View()
 
@@ -150,7 +152,8 @@ function core.step()
   local width, height = renderer.get_size()
 
   -- update
-  core.root_view.size.x, core.root_view.size.y = width, height
+  core.solver:suggest(core.root_view.constraints.width, width)
+  core.solver:suggest(core.root_view.constraints.height, height)
   core.root_view:update()
   if not core.redraw then
     if not system.window_has_focus() then system.wait_event(0.5) end
