@@ -31,7 +31,7 @@ function core.init()
   core.root_view:add_child(test)
 
   core.solver:addedit(test.vars.left)
-  test:add_constraint(S:constraint()(test.vars.left) "<=" (400))
+  test:add_constraint(S:constraint()(test.vars.left) "<=" (800))
 
   local test2 = View {
     top = 100,
@@ -48,10 +48,10 @@ function core.init()
   core.add_thread(function()
     while true do
       local l = core.root_view.children[1].vars.left:value()
-      if l < 400 then
+      if l < 800 then
         core.solver:suggest(core.root_view.children[1].vars.left, l + 1)
         core.redraw = true
-        coroutine.yield(0.004)
+        coroutine.yield(0.01)
       else
         return
       end

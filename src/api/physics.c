@@ -9,7 +9,7 @@ static int L_spring(lua_State *L) {
   double initial = luaL_checknumber(L, 4);
   double velocity = luaL_checknumber(L, 5);
 
-  double t = luaL_checknumber(L, 5);
+  double t = luaL_checknumber(L, 6);
 
   double x;
   double dx;
