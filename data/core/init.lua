@@ -5,6 +5,7 @@ local config = require "core.config"
 local style = require "core.style"
 local View
 
+
 local core = {}
 
 
@@ -50,7 +51,7 @@ function core.init()
       if l < 400 then
         core.solver:suggest(core.root_view.children[1].vars.left, l + 1)
         core.redraw = true
-        coroutine.yield(0.04)
+        coroutine.yield(0.004)
       else
         return
       end
