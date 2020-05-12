@@ -7,26 +7,40 @@ local Object = require "core.object"
 
 local View = Object:extend()
 
+local count = 0
+local function inc()
+  count = count + 1
+  return count
+end
 
 function View:new()
   local S = core.solver
-  local left = S:var "left"
-  local top = S:var "top"
-  local right = S:var "right"
-  local bottom = S:var "bottom"
-  local width = S:var "width"
-  local height = S:var "height"
-  local centerX = S:var "centerX"
-  local centerY = S:var "centerY"
-
-  S:addconstraint(S:constraint()(left) ">=" (0))
-  S:addconstraint(S:constraint()(top) ">=" (0))
-  S:addconstraint(width :eq (right - left))
-  S:addconstraint(height :eq (bottom - top))
-  S:addconstraint(centerX :eq (left + (width / 2)))
-  S:addconstraint(centerY :eq (top + (height / 2)))
+  local num = inc()
+  local left = S:var (num .. "left")
+  local top = S:var (num .. "top")
+  local right = S:var (num .. "right")
+  local bottom = S:var (num .. "bottom")
+  local width = S:var (num .. "width")
+  local height = S:var (num .. "height")
+  local centerX = S:var (num .. "centerX")
+  local centerY = S:var (num .. "centerY")
 
   self.constraints = {
+    width :eq (right - left) :strength "required",
+    height :eq (bottom - top) :strength "required",
+    centerX :eq (left + (width / 2)) :strength "required",
+    centerY :eq (top + (height / 2)) :strength "required",
+    S:constraint()(left) "<=" (right),
+    S:constraint()(top) "<=" (bottom),
+    S:constraint()(left) ">=" (0),
+    S:constraint()(top) ">=" (0)
+  }
+  
+  for i=1,#self.constraints do
+    S:addconstraint(self.constraints[i])
+  end
+
+  self.vars = {
     left = left,
     top = top,
     right = right,
@@ -45,6 +59,12 @@ function View:new()
   self.style = {
     background_color = style.background
   }
+end
+
+
+function View:add_constraint(constraint)
+  table.insert(self.constraints, constraint)
+  core.solver:addconstraint(constraint)
 end
 
 
@@ -81,13 +101,13 @@ end
 
 function View:get_scrollbar_rect()
   local sz = self:get_scrollable_size()
-  local height = self.constraints.height:value()
+  local height = self.vars.height:value()
   if sz <= height or sz == math.huge then
     return 0, 0, 0, 0
   end
   local h = math.max(20, height * height / sz)
-  local right = self.constraints.right:value()
-  local top = self.constraints.top:value()
+  local right = self.vars.right:value()
+  local top = self.vars.top:value()
   return
     right - style.scrollbar_size,
     top + self.scroll.y * (height - h) / (sz - height),
@@ -117,7 +137,7 @@ end
 
 function View:on_mouse_moved(x, y, dx, dy)
   if self.dragging_scrollbar then
-    local height = self.constraints.height:value()
+    local height = self.vars.height:value()
     local delta = self:get_scrollable_size() / height * dy
     self.scroll.to.y = self.scroll.to.y + delta
   end
@@ -140,15 +160,15 @@ end
 function View:get_content_bounds()
   local x = self.scroll.x
   local y = self.scroll.y
-  local width = self.constraints.width:update()
-  local height = self.constraints.height:update()
+  local width = self.vars.width:update()
+  local height = self.vars.height:update()
   return x, y, x + width, y + height
 end
 
 
 function View:get_content_offset()
-  local left = self.constraints.left:value()
-  local top = self.constraints.top:value()
+  local left = self.vars.left:value()
+  local top = self.vars.top:value()
   local x = common.round(left - self.scroll.x)
   local y = common.round(top - self.scroll.y)
   return x, y
@@ -156,7 +176,7 @@ end
 
 
 function View:clamp_scroll_position()
-  local max = self:get_scrollable_size() - self.constraints.height:value()
+  local max = self:get_scrollable_size() - self.vars.height:value()
   self.scroll.to.y = common.clamp(self.scroll.to.y, 0, max)
 end
 
@@ -169,8 +189,8 @@ end
 
 
 function View:draw_background(color)
-  local x, y = self.constraints.left:value(), self.constraints.top:value()
-  local w, h = self.constraints.width:value(), self.constraints.height:value()
+  local x, y = self.vars.left:value(), self.vars.top:value()
+  local w, h = self.vars.width:value(), self.vars.height:value()
   renderer.draw_rect(x, y, w + x % 1, h + y % 1, color)
 end
 
@@ -183,7 +203,7 @@ function View:draw_scrollbar()
 end
 
 
-function View:addChild(child)
+function View:add_child(child)
   table.insert(self.children, child)
   child.parent = self
   return child
@@ -192,6 +212,10 @@ end
 
 function View:draw()
   self:draw_background(self.style.background_color)
+  for i=1, #self.children do
+    local child = self.children[i]
+    child:draw()
+  end
 end
 
 

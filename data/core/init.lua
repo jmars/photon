@@ -11,13 +11,34 @@ local core = {}
 function core.init()
   View = require "core.view"
 
-  -- renderer.show_debug(true)
+  renderer.show_debug(true)
   core.frame_start = 0
   core.clip_rect_stack = {{ 0,0,0,0 }}
   core.threads = setmetatable({}, { __mode = "k" })
   core.solver = amoeba.new()
+  local S = core.solver
 
   core.root_view = View()
+
+  local test = View()
+  test.style.background_color = style.text
+  core.root_view:add_child(test)
+  S:suggest(test.vars.top, 10)
+  S:suggest(test.vars.height, 100)
+  S:suggest(test.vars.width, 100)
+
+  core.solver:addedit(test.vars.left)
+  test:add_constraint(S:constraint()(test.vars.left) "<=" (400))
+  S:suggest(test.vars.left, 250)
+
+  local test2 = View()
+  core.root_view:add_child(test2)
+  test2.style.background_color = style.selection
+  test2:add_constraint(test2.vars.left :eq (test.vars.right + 25))
+  S:suggest(test2.vars.top, 10)
+  S:suggest(test2.vars.height, 100)
+  S:suggest(test2.vars.width, 100)
+
 
   core.active_view = core.root_view
 end
@@ -152,9 +173,13 @@ function core.step()
   local width, height = renderer.get_size()
 
   -- update
-  core.solver:suggest(core.root_view.constraints.width, width)
-  core.solver:suggest(core.root_view.constraints.height, height)
+  core.solver:suggest(core.root_view.vars.width, width)
+  core.solver:suggest(core.root_view.vars.height, height)
+  local l = core.root_view.children[1].vars.left:value()
+  core.solver:suggest(core.root_view.children[1].vars.left, l + 1)
   core.root_view:update()
+  print(core.solver)
+  core.redraw = true
   if not core.redraw then
     if not system.window_has_focus() then system.wait_event(0.5) end
     return
