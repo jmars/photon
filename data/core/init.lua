@@ -20,24 +20,26 @@ function core.init()
 
   core.root_view = View()
 
-  local test = View()
+  local test = View {
+    left = 100,
+    top = 100,
+    width = 100,
+    height = 100
+  }
   test.style.background_color = style.text
   core.root_view:add_child(test)
-  S:suggest(test.vars.top, 10)
-  S:suggest(test.vars.height, 100)
-  S:suggest(test.vars.width, 100)
 
   core.solver:addedit(test.vars.left)
   test:add_constraint(S:constraint()(test.vars.left) "<=" (400))
-  S:suggest(test.vars.left, 250)
 
-  local test2 = View()
+  local test2 = View {
+    top = 100,
+    width = 100,
+    height = 100
+  }
   core.root_view:add_child(test2)
   test2.style.background_color = style.selection
   test2:add_constraint(test2.vars.left :eq (test.vars.right + 25))
-  S:suggest(test2.vars.top, 10)
-  S:suggest(test2.vars.height, 100)
-  S:suggest(test2.vars.width, 100)
 
 
   core.active_view = core.root_view

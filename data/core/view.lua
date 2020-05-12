@@ -13,8 +13,9 @@ local function inc()
   return count
 end
 
-function View:new()
+function View:new(options)
   local S = core.solver
+
   local num = inc()
   local left = S:var (num .. "left")
   local top = S:var (num .. "top")
@@ -50,6 +51,15 @@ function View:new()
     centerX = centerX,
     centerY = centerY
   }
+
+  if options ~= nil then
+    for k,v in pairs(self.vars) do
+      if options[k] ~= nil then
+        S:suggest(self.vars[k], options[k])
+      end
+    end
+  end
+
   self.scroll = { x = 0, y = 0, to = { x = 0, y = 0 } }
   self.cursor = "arrow"
   self.scrollable = false
