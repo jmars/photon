@@ -43,6 +43,19 @@ function core.init()
 
 
   core.active_view = core.root_view
+
+  core.add_thread(function()
+    while true do
+      local l = core.root_view.children[1].vars.left:value()
+      if l < 400 then
+        core.solver:suggest(core.root_view.children[1].vars.left, l + 1)
+        core.redraw = true
+        coroutine.yield(0.04)
+      else
+        return
+      end
+    end
+  end)
 end
 
 
@@ -177,11 +190,7 @@ function core.step()
   -- update
   core.solver:suggest(core.root_view.vars.width, width)
   core.solver:suggest(core.root_view.vars.height, height)
-  local l = core.root_view.children[1].vars.left:value()
-  core.solver:suggest(core.root_view.children[1].vars.left, l + 1)
   core.root_view:update()
-  print(core.solver)
-  core.redraw = true
   if not core.redraw then
     if not system.window_has_focus() then system.wait_event(0.5) end
     return
