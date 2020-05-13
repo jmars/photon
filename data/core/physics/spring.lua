@@ -1,10 +1,13 @@
 local Object = require 'core.object'
 
+
 local epsilon = 0.001;
+
 
 local function almostEqual(a, b, epsilon)
   return (a > (b - epsilon)) and (a < (b + epsilon))
 end
+
 
 local function almostZero(a, epsilon)
   return almostEqual(a, 0, epsilon)
@@ -12,6 +15,7 @@ end
 
 
 local Spring = Object:extend()
+
 
 function Spring:new(mass, springConstant, damping)
   self.m = mass

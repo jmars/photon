@@ -2,6 +2,7 @@ local core = require "core"
 local config = require "core.config"
 local style = require "core.style"
 local common = require "core.common"
+local events = require "core.events"
 local Object = require "core.object"
 
 
@@ -69,6 +70,8 @@ function View:new(options)
   self.style = {
     background_color = style.background
   }
+
+  events.add_view(self)
 end
 
 
@@ -170,8 +173,8 @@ end
 function View:get_content_bounds()
   local x = self.scroll.x
   local y = self.scroll.y
-  local width = self.vars.width:update()
-  local height = self.vars.height:update()
+  local width = self.vars.width:value()
+  local height = self.vars.height:value()
   return x, y, x + width, y + height
 end
 

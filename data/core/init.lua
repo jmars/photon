@@ -3,6 +3,7 @@ require "core.strict"
 local common = require "core.common"
 local config = require "core.config"
 local style = require "core.style"
+local events = require "core.events"
 local View
 
 
@@ -10,6 +11,8 @@ local core = {}
 
 
 function core.init()
+  events.init()
+  
   View = require "core.view"
 
   renderer.show_debug(true)
@@ -44,19 +47,6 @@ function core.init()
 
 
   core.active_view = core.root_view
-
-  core.add_thread(function()
-    while true do
-      local l = core.root_view.children[1].vars.left:value()
-      if l < 800 then
-        core.solver:suggest(core.root_view.children[1].vars.left, l + 1)
-        core.redraw = true
-        coroutine.yield(0.01)
-      else
-        return
-      end
-    end
-  end)
 end
 
 
@@ -152,15 +142,15 @@ end
 
 function core.on_event(type, ...)
   if type == "textinput" then
-    core.root_view:on_text_input(...)
+    events.on_text_input(...)
   elseif type == "mousemoved" then
-    core.root_view:on_mouse_moved(...)
+    events.on_mouse_moved(...)
   elseif type == "mousepressed" then
-    core.root_view:on_mouse_pressed(...)
+    events.on_mouse_pressed(...)
   elseif type == "mousereleased" then
-    core.root_view:on_mouse_released(...)
+    events.on_mouse_released(...)
   elseif type == "mousewheel" then
-    core.root_view:on_mouse_wheel(...)
+    events.on_mouse_wheel(...)
   elseif type == "quit" then
     core.quit()
   end
@@ -264,12 +254,6 @@ function core.on_error(err)
   fp:write("Error: " .. tostring(err) .. "\n")
   fp:write(debug.traceback(nil, 4))
   fp:close()
-  -- save copy of all unsaved documents
-  for _, doc in ipairs(core.docs) do
-    if doc:is_dirty() and doc.filename then
-      doc:save(doc.filename .. "~")
-    end
-  end
 end
 
 
