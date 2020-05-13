@@ -632,6 +632,12 @@ static int Lautoupdate(lua_State *L) {
     return 0;
 }
 
+static int Lupdate(lua_State *L) {
+    aml_Solver *S = (aml_Solver*)luaL_checkudata(L, 1, AML_SOLVER_TYPE);
+    am_updatevars(S->solver);
+    return 0;
+}
+
 static int Laddconstraint(lua_State *L) {
     aml_Solver *S = (aml_Solver*)luaL_checkudata(L, 1, AML_SOLVER_TYPE);
     aml_Cons *lcons = (aml_Cons*)luaL_testudata(L, 2, AML_CONS_TYPE);
@@ -685,6 +691,7 @@ LUALIB_API int luaopen_amoeba(lua_State *L) {
         ENTRY(new),
         ENTRY(delete),
         ENTRY(autoupdate),
+        ENTRY(update),
         ENTRY(reset),
         ENTRY(addconstraint),
         ENTRY(delconstraint),

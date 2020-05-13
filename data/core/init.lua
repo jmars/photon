@@ -22,6 +22,7 @@ function core.init()
   core.threads = setmetatable({}, { __mode = "k" })
   core.solver = amoeba.new()
   local S = core.solver
+  S:autoupdate(false)
 
   core.root_view = View()
   core.root_view:add_constraint(
@@ -50,6 +51,7 @@ function core.init()
   test2:add_constraint(test2.vars.left :eq (test.vars.right + 25))
 
   core.active_view = core.root_view
+  core.redraw = true
 end
 
 
@@ -173,7 +175,6 @@ function core.step()
     else
       local _, res = core.try(core.on_event, type, a, b, c, d)
     end
-    core.redraw = true
   end
   if mouse_moved then
     core.try(core.on_event, "mousemoved", mouse.x, mouse.y, mouse.dx, mouse.dy)
@@ -184,6 +185,7 @@ function core.step()
   -- update
   core.solver:suggest(core.root_view.vars.width, width)
   core.solver:suggest(core.root_view.vars.height, height)
+  core.solver:update()
   core.root_view:update()
   if not core.redraw then
     if not system.window_has_focus() then system.wait_event(0.5) end
