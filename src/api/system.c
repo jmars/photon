@@ -189,59 +189,6 @@ static int f_window_has_focus(lua_State *L) {
 }
 
 
-static int f_show_confirm_dialog(lua_State *L) {
-  const char *title = luaL_checkstring(L, 1);
-  const char *msg = luaL_checkstring(L, 2);
-
-#if _WIN32
-  int id = MessageBox(0, msg, title, MB_YESNO | MB_ICONWARNING);
-  lua_pushboolean(L, id == IDYES);
-
-#else
-  SDL_MessageBoxButtonData buttons[] = {
-    { SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 1, "Yes" },
-    { SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 0, "No" },
-  };
-  SDL_MessageBoxData data = {
-    .title = title,
-    .message = msg,
-    .numbuttons = 2,
-    .buttons = buttons,
-  };
-  int buttonid;
-  SDL_ShowMessageBox(&data, &buttonid);
-  lua_pushboolean(L, buttonid == 1);
-#endif
-  return 1;
-}
-
-
-static int f_list_dir(lua_State *L) {
-  const char *path = luaL_checkstring(L, 1);
-
-  DIR *dir = opendir(path);
-  if (!dir) {
-    lua_pushnil(L);
-    lua_pushstring(L, strerror(errno));
-    return 2;
-  }
-
-  lua_newtable(L);
-  int i = 1;
-  struct dirent *entry;
-  while ( (entry = readdir(dir)) ) {
-    if (strcmp(entry->d_name, "." ) == 0) { continue; }
-    if (strcmp(entry->d_name, "..") == 0) { continue; }
-    lua_pushstring(L, entry->d_name);
-    lua_rawseti(L, -2, i);
-    i++;
-  }
-
-  closedir(dir);
-  return 1;
-}
-
-
 #ifdef _WIN32
   #include <windows.h>
   #define realpath(x, y) _fullpath(y, x, MAX_PATH)
@@ -253,37 +200,6 @@ static int f_absolute_path(lua_State *L) {
   if (!res) { return 0; }
   lua_pushstring(L, res);
   free(res);
-  return 1;
-}
-
-
-static int f_get_file_info(lua_State *L) {
-  const char *path = luaL_checkstring(L, 1);
-
-  struct stat s;
-  int err = stat(path, &s);
-  if (err < 0) {
-    lua_pushnil(L);
-    lua_pushstring(L, strerror(errno));
-    return 2;
-  }
-
-  lua_newtable(L);
-  lua_pushnumber(L, s.st_mtime);
-  lua_setfield(L, -2, "modified");
-
-  lua_pushnumber(L, s.st_size);
-  lua_setfield(L, -2, "size");
-
-  if (S_ISREG(s.st_mode)) {
-    lua_pushstring(L, "file");
-  } else if (S_ISDIR(s.st_mode)) {
-    lua_pushstring(L, "dir");
-  } else {
-    lua_pushnil(L);
-  }
-  lua_setfield(L, -2, "type");
-
   return 1;
 }
 
@@ -318,50 +234,6 @@ static int f_sleep(lua_State *L) {
 }
 
 
-static int f_exec(lua_State *L) {
-  size_t len;
-  const char *cmd = luaL_checklstring(L, 1, &len);
-  char *buf = malloc(len + 16);
-  if (!buf) { luaL_error(L, "buffer allocation failed"); }
-#if _WIN32
-  sprintf(buf, "cmd /c %s", cmd);
-  WinExec(buf, SW_HIDE);
-#else
-  sprintf(buf, "%s &", cmd);
-  int res = system(buf);
-  (void) res;
-#endif
-  free(buf);
-  return 0;
-}
-
-
-static int f_fuzzy_match(lua_State *L) {
-  const char *str = luaL_checkstring(L, 1);
-  const char *ptn = luaL_checkstring(L, 2);
-  int score = 0;
-  int run = 0;
-
-  while (*str && *ptn) {
-    while (*str == ' ') { str++; }
-    while (*ptn == ' ') { ptn++; }
-    if (tolower(*str) == tolower(*ptn)) {
-      score += run;
-      run++;
-      ptn++;
-    } else {
-      score--;
-      run = 0;
-    }
-    str++;
-  }
-  if (*ptn) { return 0; }
-
-  lua_pushnumber(L, score - (int) strlen(str));
-  return 1;
-}
-
-
 static const luaL_Reg lib[] = {
   { "poll_event",          f_poll_event          },
   { "wait_event",          f_wait_event          },
@@ -369,16 +241,11 @@ static const luaL_Reg lib[] = {
   { "set_window_title",    f_set_window_title    },
   { "set_window_mode",     f_set_window_mode     },
   { "window_has_focus",    f_window_has_focus    },
-  { "show_confirm_dialog", f_show_confirm_dialog },
-  { "list_dir",            f_list_dir            },
   { "absolute_path",       f_absolute_path       },
-  { "get_file_info",       f_get_file_info       },
   { "get_clipboard",       f_get_clipboard       },
   { "set_clipboard",       f_set_clipboard       },
   { "get_time",            f_get_time            },
   { "sleep",               f_sleep               },
-  { "exec",                f_exec                },
-  { "fuzzy_match",         f_fuzzy_match         },
   { NULL, NULL }
 };
 

@@ -58,29 +58,6 @@ local function compare_score(a, b)
   return a.score > b.score
 end
 
-local function fuzzy_match_items(items, needle)
-  local res = {}
-  for _, item in ipairs(items) do
-    local score = system.fuzzy_match(tostring(item), needle)
-    if score then
-      table.insert(res, { text = item, score = score })
-    end
-  end
-  table.sort(res, compare_score)
-  for i, item in ipairs(res) do
-    res[i] = item.text
-  end
-  return res
-end
-
-
-function common.fuzzy_match(haystack, needle)
-  if type(haystack) == "table" then
-    return fuzzy_match_items(haystack, needle)
-  end
-  return system.fuzzy_match(haystack, needle)
-end
-
 
 function common.path_suggest(text)
   local path, name = text:match("^(.-)([^/\\]*)$")
