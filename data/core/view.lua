@@ -55,6 +55,7 @@ function View:new(options)
   if options ~= nil then
     for k,v in pairs(self.vars) do
       if options[k] ~= nil then
+        S:addedit(self.vars[k], "strong")
         S:suggest(self.vars[k], options[k])
       end
     end

@@ -4,6 +4,7 @@ local common = require "core.common"
 local config = require "core.config"
 local style = require "core.style"
 local events = require "core.events"
+local common = require "core.common"
 local View
 
 
@@ -26,29 +27,48 @@ function core.init()
 
   core.root_view = View()
   core.root_view:add_constraint(
-    core.root_view.vars.left :eq (0),
-    core.root_view.vars.top :eq (0)
+    core.root_view.vars.left :eq (0) :strength "required",
+    core.root_view.vars.top :eq (0) :strength "required"
   )
+  S:addedit(core.root_view.vars.width, "required")
+  S:addedit(core.root_view.vars.height, "required")
 
-  local test = Draggable {
-    left = 100,
+  local boundaries = View {
     top = 100,
-    width = 100,
-    height = 100
+    width = 500,
+    height = 500,
+    left = 300,
   }
+
+  boundaries.style.background_color = { common.color "#111111" }
+
+  core.root_view:add_child(boundaries)
+
+  local test = Draggable()
+  test:add_constraint(
+    test.vars.width :eq (100) :strength "required",
+    test.vars.height :eq (100) :strength "required"
+  )
   test.style.background_color = style.text
   core.root_view:add_child(test)
 
   core.solver:addedit(test.vars.left)
 
   local test2 = View {
-    top = 100,
     width = 100,
     height = 100
   }
   core.root_view:add_child(test2)
   test2.style.background_color = style.selection
-  test2:add_constraint(test2.vars.left :eq (test.vars.right + 25))
+  test2:add_constraint(
+    S:constraint()(test2.vars.left) ">=" (test.vars.right + 100) :strength "medium",
+    S:constraint()(test2.vars.top) "==" (test.vars.top) : strength "medium",
+    S:constraint()(test2.vars.right) "<=" (800) :strength "required",
+    S:constraint()(test2.vars.left) ">=" (300) :strength "required",
+    S:constraint()(test2.vars.bottom) "<=" (600) :strength "required",
+    S:constraint()(test2.vars.top) ">=" (100) :strength "required",
+    S:constraint()(test2.vars.left) "==" (test.vars.right) :strength "weak"
+  )
 
   core.active_view = core.root_view
   core.redraw = true

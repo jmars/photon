@@ -9,6 +9,9 @@ function Draggable:new(options)
   self.dragging = false
   self.anchorX = 0
   self.anchorY = 0
+  local S = core.solver
+  S:addedit(self.vars.left, "strong")
+  S:addedit(self.vars.top, "strong")
 end
 
 function Draggable:on_mouse_pressed(button, x, y, clicks)
