@@ -35,6 +35,10 @@ function events.on_mouse_pressed(button, x, y, clicks)
     view:on_mouse_pressed(button, x, y, clicks)
     _, view = coroutine.resume(events.thread, x, y)
   end
+  for i=1,#events.views do
+    view = events.views[i]
+    view:on_mouse_pressed_global(button, x, y, clicks)
+  end
 end
 
 
@@ -44,32 +48,38 @@ function events.on_mouse_released(button, x, y)
     view:on_mouse_released(button, x, y)
     _, view = coroutine.resume(events.thread, x, y)
   end
+  for i=1,#events.views do
+    view = events.views[i]
+    view:on_mouse_released_global(button, x, y)
+  end
 end
 
 
 function events.on_mouse_moved(x, y, dx, dy)
   local _, view = coroutine.resume(events.thread, x, y)
   while view ~= nil do
-    view:on_mouse_moved(button, x, y, dx, dy)
+    view:on_mouse_moved(x, y, dx, dy)
     _, view = coroutine.resume(events.thread, x, y)
+  end
+  for i=1,#events.views do
+    view = events.views[i]
+    view:on_mouse_moved_global(x, y, dx, dy)
   end
 end
 
 
 function events.on_text_input(text)
-  local _, view = coroutine.resume(events.thread, x, y)
-  while view ~= nil do
-    view:on_text_input(button, text)
-    _, view = coroutine.resume(events.thread, x, y)
+  for i=1,#events.views do
+    local view = events.views[i]
+    view:on_text_input(text)
   end
 end
 
 
 function events.on_mouse_wheel(y)
-  local _, view = coroutine.resume(events.thread, x, y)
-  while view ~= nil do
-    view:on_mouse_pressed(y)
-    _, view = coroutine.resume(events.thread, x, y)
+  for i=1,#events.views do
+    local view = events.views[i]
+    view:on_mouse_wheel(y)
   end
 end
 

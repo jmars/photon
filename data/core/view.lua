@@ -27,7 +27,7 @@ function View:new(options)
   local centerX = S:var (num .. "centerX")
   local centerY = S:var (num .. "centerY")
 
-  self.constraints = {
+  local constraints = {
     width :eq (right - left) :strength "required",
     height :eq (bottom - top) :strength "required",
     centerX :eq (left + (width / 2)) :strength "required",
@@ -38,9 +38,8 @@ function View:new(options)
     S:constraint()(top) ">=" (0)
   }
   
-  for i=1,#self.constraints do
-    S:addconstraint(self.constraints[i])
-  end
+  self.constraints = {}
+  self:add_constraint(unpack(constraints))
 
   self.vars = {
     left = left,
@@ -75,9 +74,14 @@ function View:new(options)
 end
 
 
-function View:add_constraint(constraint)
-  table.insert(self.constraints, constraint)
-  core.solver:addconstraint(constraint)
+function View:add_constraint(...)
+  local S = core.solver
+  local constraints = {...}
+  for i=1,#constraints do
+    local constraint = constraints[i]
+    table.insert(self.constraints, constraint)
+    S:addconstraint(constraint)
+  end
 end
 
 
@@ -143,8 +147,16 @@ function View:on_mouse_pressed(button, x, y, clicks)
 end
 
 
+function View:on_mouse_pressed_global(button, x, y, clicks)
+end
+
+
 function View:on_mouse_released(button, x, y)
   self.dragging_scrollbar = false
+end
+
+
+function View:on_mouse_released_global(button, x, y)
 end
 
 
@@ -155,6 +167,10 @@ function View:on_mouse_moved(x, y, dx, dy)
     self.scroll.to.y = self.scroll.to.y + delta
   end
   self.hovered_scrollbar = self:scrollbar_overlaps_point(x, y)
+end
+
+
+function View:on_mouse_moved_global(x, y, dx, dy)
 end
 
 
@@ -219,6 +235,16 @@ end
 function View:add_child(child)
   table.insert(self.children, child)
   child.parent = self
+  local S = core.solver
+  local constraints = {
+    S:constraint()(child.vars.top) ">=" (self.vars.top),
+    S:constraint()(child.vars.bottom) "<=" (self.vars.bottom),
+    S:constraint()(child.vars.left) ">=" (self.vars.left),
+    S:constraint()(child.vars.right) "<=" (self.vars.right)
+  }
+  for i=1,#constraints do
+    child:add_constraint(constraints[i])
+  end
   return child
 end
 

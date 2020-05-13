@@ -14,8 +14,9 @@ function core.init()
   events.init()
   
   View = require "core.view"
+  local Draggable = require 'views.draggable'
 
-  renderer.show_debug(true)
+  --renderer.show_debug(true)
   core.frame_start = 0
   core.clip_rect_stack = {{ 0,0,0,0 }}
   core.threads = setmetatable({}, { __mode = "k" })
@@ -23,8 +24,12 @@ function core.init()
   local S = core.solver
 
   core.root_view = View()
+  core.root_view:add_constraint(
+    core.root_view.vars.left :eq (0),
+    core.root_view.vars.top :eq (0)
+  )
 
-  local test = View {
+  local test = Draggable {
     left = 100,
     top = 100,
     width = 100,
@@ -34,7 +39,6 @@ function core.init()
   core.root_view:add_child(test)
 
   core.solver:addedit(test.vars.left)
-  test:add_constraint(S:constraint()(test.vars.left) "<=" (800))
 
   local test2 = View {
     top = 100,
@@ -44,7 +48,6 @@ function core.init()
   core.root_view:add_child(test2)
   test2.style.background_color = style.selection
   test2:add_constraint(test2.vars.left :eq (test.vars.right + 25))
-
 
   core.active_view = core.root_view
 end
