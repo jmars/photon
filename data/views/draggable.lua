@@ -9,7 +9,6 @@ function Draggable:new(options)
   self.dragging = false
   self.anchorX = 0
   self.anchorY = 0
-  self.animating = true
   local S = core.solver
   S:addedit(self.vars.left, "required")
   S:addedit(self.vars.top, "required")
@@ -34,6 +33,7 @@ function Draggable:on_mouse_moved_global(x, y, dx, dy)
     local newY = y - self.anchorY
     S:suggest(self.vars.left, newX)
     S:suggest(self.vars.top, newY)
+    self.animating = true
     self.physics.velocity.x = newX - prevX
     self.physics.velocity.y = newY - prevY
     core.redraw = true

@@ -1,6 +1,14 @@
 local core = require 'core'
 
 
+local epsilon = 0.1;
+
+
+local function almostEqual(a, b)
+  return (a > (b - epsilon)) and (a < (b + epsilon))
+end
+
+
 local simulation = {}
 
 
@@ -45,7 +53,7 @@ function simulation.step()
     local left = math.abs(view.vars.left:value())
     local top = math.abs(view.vars.top:value())
 
-    -- drag force
+    -- drag force from air
     local fx = -0.5 * Cd * area * rho * velocity.x * velocity.x * velocity.x / math.abs(velocity.x)
     local fy = -0.5 * Cd * area * rho * velocity.y * velocity.y * velocity.y / math.abs(velocity.y)
 
@@ -68,9 +76,20 @@ function simulation.step()
     velocity.x = velocity.x * math.pow(drag, frameRate)
     velocity.y = velocity.y * math.pow(drag, frameRate)
 
+    local newLeft = left + (velocity.x * frameRate * 100)
+    local newTop = top + (velocity.y * frameRate * 100)
+
+    if almostEqual(left, newLeft) then
+      if almostEqual(top, newTop) then
+        view.animating = false
+        print 'stopped'
+        goto skip
+      end
+    end
+
     local S = core.solver
-    S:suggest(view.vars.left, left + (velocity.x * frameRate * 100))
-    S:suggest(view.vars.top, top + (velocity.y * frameRate * 100))
+    S:suggest(view.vars.left, newLeft)
+    S:suggest(view.vars.top, newTop)
 
     ::skip::
   end
