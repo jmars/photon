@@ -45,8 +45,6 @@ function simulation.step()
       goto skip
     end
 
-    redraw = true
-
     local velocity = view.physics.velocity
     local mass = view.physics.mass
     local area = (view.vars.width:value() * view.vars.height:value()) / 10000
@@ -82,7 +80,6 @@ function simulation.step()
     if almostEqual(left, newLeft) then
       if almostEqual(top, newTop) then
         view.animating = false
-        print 'stopped'
         goto skip
       end
     end
@@ -90,6 +87,8 @@ function simulation.step()
     local S = core.solver
     S:suggest(view.vars.left, newLeft)
     S:suggest(view.vars.top, newTop)
+
+    redraw = true
 
     ::skip::
   end
