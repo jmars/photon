@@ -1,6 +1,6 @@
 require "core.compat53"
 require "core.strict"
-local common = require "core.common"
+require "core.nan"
 local config = require "core.config"
 local style = require "core.style"
 local events = require "core.events"
@@ -13,6 +13,9 @@ local core = {}
 
 function core.init()
   events.init()
+
+  local simulation = require 'core.physics'
+  simulation.init()
   
   View = require "core.view"
   local Draggable = require 'views.draggable'
@@ -33,12 +36,13 @@ function core.init()
   S:addedit(core.root_view.vars.width, "required")
   S:addedit(core.root_view.vars.height, "required")
 
-  local boundaries = View {
-    top = 100,
-    width = 500,
-    height = 500,
-    left = 300,
-  }
+  local boundaries = View()
+  boundaries:add_constraint(
+    boundaries.vars.top :eq (100) :strength "required",
+    boundaries.vars.left :eq (300) :strength "required",
+    boundaries.vars.height :eq (500) :strength "required",
+    boundaries.vars.width :eq (500) :strength "required"
+  )
 
   boundaries.style.background_color = { common.color "#111111" }
 
@@ -54,23 +58,19 @@ function core.init()
 
   core.solver:addedit(test.vars.left)
 
-  local test2 = View {
-    width = 100,
-    height = 100
-  }
-  core.root_view:add_child(test2)
+  local test2 = View()
+  boundaries:add_child(test2)
   test2.style.background_color = style.selection
   test2:add_constraint(
     S:constraint()(test2.vars.left) ">=" (test.vars.right + 100) :strength "medium",
-    S:constraint()(test2.vars.top) "==" (test.vars.top) : strength "medium",
-    S:constraint()(test2.vars.right) "<=" (800) :strength "required",
-    S:constraint()(test2.vars.left) ">=" (300) :strength "required",
-    S:constraint()(test2.vars.bottom) "<=" (600) :strength "required",
-    S:constraint()(test2.vars.top) ">=" (100) :strength "required",
-    S:constraint()(test2.vars.left) "==" (test.vars.right) :strength "weak"
+    S:constraint()(test2.vars.left) "==" (test.vars.right) :strength "medium",
+    S:constraint()(test2.vars.top) "==" (test.vars.top) :strength "medium",
+    test2.vars.width :eq (100) :strength "required",
+    test2.vars.height :eq (100) :strength "required"
   )
 
   core.active_view = core.root_view
+  core.add_thread(simulation.thread)
   core.redraw = true
 end
 

@@ -3,6 +3,7 @@ local config = require "core.config"
 local style = require "core.style"
 local common = require "core.common"
 local events = require "core.events"
+local simulation = require 'core.physics'
 local Object = require "core.object"
 
 
@@ -14,7 +15,7 @@ local function inc()
   return count
 end
 
-function View:new(options)
+function View:new()
   local S = core.solver
 
   local num = inc()
@@ -32,10 +33,10 @@ function View:new(options)
     height :eq (bottom - top) :strength "required",
     centerX :eq (left + (width / 2)) :strength "required",
     centerY :eq (top + (height / 2)) :strength "required",
-    S:constraint()(left) "<=" (right),
-    S:constraint()(top) "<=" (bottom),
-    S:constraint()(left) ">=" (0),
-    S:constraint()(top) ">=" (0)
+    S:constraint()(left) "<=" (right) :strength "required",
+    S:constraint()(top) "<=" (bottom) :strength "required",
+    S:constraint()(left) ">=" (0) :strength "required",
+    S:constraint()(top) ">=" (0) :strength "required"
   }
   
   self.constraints = {}
@@ -52,14 +53,11 @@ function View:new(options)
     centerY = centerY
   }
 
-  if options ~= nil then
-    for k,v in pairs(self.vars) do
-      if options[k] ~= nil then
-        S:addedit(self.vars[k], "strong")
-        S:suggest(self.vars[k], options[k])
-      end
-    end
-  end
+  self.physics = {
+    mass = 1,
+    velocity = { x = 0, y = 0 },
+    restitution = -0.7
+  }
 
   self.scroll = { x = 0, y = 0, to = { x = 0, y = 0 } }
   self.cursor = "arrow"
@@ -72,6 +70,7 @@ function View:new(options)
   }
 
   events.add_view(self)
+  simulation.add_view(self)
 end
 
 
@@ -238,10 +237,10 @@ function View:add_child(child)
   child.parent = self
   local S = core.solver
   local constraints = {
-    S:constraint()(child.vars.top) ">=" (self.vars.top),
-    S:constraint()(child.vars.bottom) "<=" (self.vars.bottom),
-    S:constraint()(child.vars.left) ">=" (self.vars.left),
-    S:constraint()(child.vars.right) "<=" (self.vars.right)
+    S:constraint()(child.vars.top) ">=" (self.vars.top) :strength "required",
+    S:constraint()(child.vars.bottom) "<=" (self.vars.bottom) :strength "required",
+    S:constraint()(child.vars.left) ">=" (self.vars.left) :strength "required",
+    S:constraint()(child.vars.right) "<=" (self.vars.right) :strength "required"
   }
   for i=1,#constraints do
     child:add_constraint(constraints[i])
