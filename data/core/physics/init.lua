@@ -6,8 +6,10 @@ local simulation = {}
 
 local Cd = 0.47 -- dimensionless
 local rho = 1.22 -- fluid density
-local ag = 9.81 -- gravity
+-- local ag = 9.81 -- gravity
+local ag = 0
 local frameRate = 1/40
+local drag = 0.01
 
 
 function simulation.init()
@@ -61,6 +63,10 @@ function simulation.step()
 
     velocity.x = velocity.x + (ax * frameRate)
     velocity.y = velocity.y + (ay * frameRate)
+
+    -- surface friction
+    velocity.x = velocity.x * math.pow(drag, frameRate)
+    velocity.y = velocity.y * math.pow(drag, frameRate)
 
     local S = core.solver
     S:suggest(view.vars.left, left + (velocity.x * frameRate * 100))
