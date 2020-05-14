@@ -50,6 +50,7 @@ function simulation.step()
     local area = (view.vars.width:value() * view.vars.height:value()) / 10000
     local left = math.abs(view.vars.left:value())
     local top = math.abs(view.vars.top:value())
+    local restitution = view.physics.restitution
 
     -- drag force from air
     local fx = -0.5 * Cd * area * rho * velocity.x * velocity.x * velocity.x / math.abs(velocity.x)
@@ -90,6 +91,16 @@ function simulation.step()
     local S = core.solver
     S:suggest(view.vars.left, newLeft)
     S:suggest(view.vars.top, newTop)
+
+    S:update()
+
+    if left == view.vars.left:value() then
+      velocity.x = velocity.x * restitution
+    end
+
+    if top == view.vars.top:value() then
+      velocity.y = velocity.y * restitution
+    end
 
     redraw = true
 
