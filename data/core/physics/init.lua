@@ -67,6 +67,9 @@ function simulation.step()
     local ax = fx / mass
     local ay = ag + (fy / mass)
 
+    local pX = velocity.x
+    local pY = velocity.y
+
     velocity.x = velocity.x + (ax * frameRate)
     velocity.y = velocity.y + (ay * frameRate)
 
@@ -74,15 +77,15 @@ function simulation.step()
     velocity.x = velocity.x * math.pow(drag, frameRate)
     velocity.y = velocity.y * math.pow(drag, frameRate)
 
-    local newLeft = left + (velocity.x * frameRate * 100)
-    local newTop = top + (velocity.y * frameRate * 100)
-
-    if almostEqual(left, newLeft) then
-      if almostEqual(top, newTop) then
+    if almostEqual(velocity.x, pX) then
+      if almostEqual(velocity.y, pY) then
         view.animating = false
         goto skip
       end
     end
+
+    local newLeft = left + (velocity.x * frameRate * 100)
+    local newTop = top + (velocity.y * frameRate * 100)
 
     local S = core.solver
     S:suggest(view.vars.left, newLeft)
