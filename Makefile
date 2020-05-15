@@ -3,7 +3,7 @@ LFLAGS = -L src/lib/luajit/src -lSDL2 -lluajit -lm
 
 objects = src/lib/stb/stb_truetype.o src/api/compat-5.3.o src/api/api.o src/api/renderer.o \
 	src/api/renderer_font.o src/api/system.o src/rencache.o src/renderer.o \
-	src/lib/amoeba/lua_amoeba.o src/lib/physics/spring.o src/api/physics.o \
+	src/lib/amoeba/lua_amoeba.o \
 	src/lib/stb/stb_image.o
 
 all: $(objects) src/lib/luajit/src/libluajit.a
