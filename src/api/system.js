@@ -1,5 +1,5 @@
 
-import { luaconf, lua, lualib, lauxlib } from "../lib/fengari"
+import { luaconf, lua, lualib, lauxlib, to_luastring } from "../lib/fengari"
 
 function poll_event(L) {
 
@@ -42,7 +42,8 @@ function get_time(L) {
 }
 
 function sleep(L) {
-
+  lua.lua_pushstring(L, to_luastring("hello"))
+  return 1;
 }
 
 const lib = {

@@ -78,46 +78,39 @@ const {
 
 let lua_writestring;
 let lua_writeline;
-if (typeof process === "undefined") {
-    if (typeof TextDecoder === "function") { /* Older browsers don't have TextDecoder */
-        let buff = "";
-        let decoder = new TextDecoder("utf-8");
-        lua_writestring = function(s) {
-            buff += decoder.decode(s, {stream: true});
-        };
-        let empty = new Uint8Array(0);
-        lua_writeline = function() {
-            buff += decoder.decode(empty);
-            console.log(buff);
-            buff = "";
-        };
-    } else {
-        let buff = [];
-        lua_writestring = function(s) {
-            try {
-                /* If the string is valid utf8, then we can use to_jsstring */
-                s = to_jsstring(s);
-            } catch(e) {
-                /* otherwise push copy of raw array */
-                let copy = new Uint8Array(s.length);
-                copy.set(s);
-                s = copy;
-            }
-            buff.push(s);
-        };
-        lua_writeline = function() {
-            console.log.apply(console.log, buff);
-            buff = [];
-        };
-    }
-} else {
+
+if (typeof TextDecoder === "function") { /* Older browsers don't have TextDecoder */
+    let buff = "";
+    let decoder = new TextDecoder("utf-8");
     lua_writestring = function(s) {
-        process.stdout.write(Buffer.from(s));
+        buff += decoder.decode(s, {stream: true});
+    };
+    let empty = new Uint8Array(0);
+    lua_writeline = function() {
+        buff += decoder.decode(empty);
+        console.log(buff);
+        buff = "";
+    };
+} else {
+    let buff = [];
+    lua_writestring = function(s) {
+        try {
+            /* If the string is valid utf8, then we can use to_jsstring */
+            s = to_jsstring(s);
+        } catch(e) {
+            /* otherwise push copy of raw array */
+            let copy = new Uint8Array(s.length);
+            copy.set(s);
+            s = copy;
+        }
+        buff.push(s);
     };
     lua_writeline = function() {
-        process.stdout.write("\n");
+        console.log.apply(console.log, buff);
+        buff = [];
     };
 }
+
 const luaB_print = function(L) {
     let n = lua_gettop(L); /* number of arguments */
     lua_getglobal(L, to_luastring("tostring", true));
