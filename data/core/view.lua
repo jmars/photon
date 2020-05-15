@@ -56,7 +56,8 @@ function View:new()
   self.physics = {
     mass = 1,
     velocity = { x = 0, y = 0 },
-    restitution = -0.7
+    restitution = -0.7,
+    target = { x = 0, y = 0 }
   }
 
   self.scroll = { x = 0, y = 0, to = { x = 0, y = 0 } }

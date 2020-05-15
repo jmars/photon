@@ -12,12 +12,15 @@ end
 local simulation = {}
 
 
+-- constants
 local Cd = 0.47 -- dimensionless
 local rho = 1.22 -- fluid density
 -- local ag = 9.81 -- gravity
 local ag = 0
 local frameRate = 1/40
 local drag = 0.01
+local k = -30 -- Spring stiffness, in kg / s^2 
+local b = -30 -- Damping constant, in kg / s
 
 
 function simulation.init()
@@ -40,6 +43,7 @@ function simulation.step()
     local view = views[i]
     local dragging = view.dragging
     local animating = view.animating
+    local springing = view.springing
 
     if dragging or not animating then
       goto skip
@@ -51,6 +55,7 @@ function simulation.step()
     local left = math.abs(view.vars.left:value())
     local top = math.abs(view.vars.top:value())
     local restitution = view.physics.restitution
+    local physics = view.physics
 
     -- drag force from air
     local fx = -0.5 * Cd * area * rho * velocity.x * velocity.x * velocity.x / math.abs(velocity.x)
@@ -65,8 +70,19 @@ function simulation.step()
     end
 
     -- acceleration
-    local ax = fx / mass
-    local ay = ag + (fy / mass)
+    local ax = 0
+    local ay = 0
+    if not springing then
+      ax = fx / mass
+      ay = ag + (fy / mass)
+    else
+      local springX = k * (left - physics.target.x)
+      local damperX = b * velocity.x
+      ax = (springX + damperX) / mass
+      local springY = k * (top - physics.target.y)
+      local damperY = b * velocity.y
+      ay = (springY + damperY) / mass
+    end
 
     local pX = velocity.x
     local pY = velocity.y
@@ -81,6 +97,7 @@ function simulation.step()
     if almostEqual(velocity.x, pX) then
       if almostEqual(velocity.y, pY) then
         view.animating = false
+        view.springing = false
         goto skip
       end
     end
@@ -94,12 +111,18 @@ function simulation.step()
 
     S:update()
 
-    if left == view.vars.left:value() then
+    if not springing and left == view.vars.left:value() then
       velocity.x = velocity.x * restitution
+      view.springing = true
+      physics.target.x = left
+      physics.target.y = top
     end
 
-    if top == view.vars.top:value() then
+    if not springing and top == view.vars.top:value() then
       velocity.y = velocity.y * restitution
+      view.springing = true
+      physics.target.x = left
+      physics.target.y = top
     end
 
     redraw = true

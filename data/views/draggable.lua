@@ -34,8 +34,11 @@ function Draggable:on_mouse_moved_global(x, y, dx, dy)
     S:suggest(self.vars.left, newX)
     S:suggest(self.vars.top, newY)
     self.animating = true
-    self.physics.velocity.x = newX - prevX
-    self.physics.velocity.y = newY - prevY
+    self.springing = false
+    local vX = newX - prevX
+    local vY = newY - prevY
+    self.physics.velocity.x = vX
+    self.physics.velocity.y = vY
     core.redraw = true
   end
 end
