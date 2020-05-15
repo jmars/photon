@@ -36,8 +36,6 @@ function View:new()
     centerY :eq (top + (height / 2)) :strength "required",
     S:constraint()(left) "<=" (right) :strength "required",
     S:constraint()(top) "<=" (bottom) :strength "required",
-    S:constraint()(left) ">=" (0) :strength "required",
-    S:constraint()(top) ">=" (0) :strength "required",
     mass :eq (width + height) :strength "required"
   }
   
@@ -239,15 +237,6 @@ function View:add_child(child)
   table.insert(self.children, child)
   child.parent = self
   local S = core.solver
-  local constraints = {
-    S:constraint()(child.vars.top) ">=" (self.vars.top) :strength "required",
-    S:constraint()(child.vars.bottom) "<=" (self.vars.bottom) :strength "required",
-    S:constraint()(child.vars.left) ">=" (self.vars.left) :strength "required",
-    S:constraint()(child.vars.right) "<=" (self.vars.right) :strength "required"
-  }
-  for i=1,#constraints do
-    child:add_constraint(constraints[i])
-  end
   return child
 end
 

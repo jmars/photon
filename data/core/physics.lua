@@ -52,8 +52,9 @@ function simulation.step()
     local velocity = view.physics.velocity
     local mass = view.physics.mass:value()
     local area = (view.vars.width:value() * view.vars.height:value()) / 10000
-    local left = math.abs(view.vars.left:value())
-    local top = math.abs(view.vars.top:value())
+    local left = view.vars.left:value()
+    local scroll = view.scroll
+    local top = view.vars.top:value()
     local restitution = view.physics.restitution
     local physics = view.physics
 
@@ -111,20 +112,20 @@ function simulation.step()
 
     S:update()
 
-    if not springing and left == view.vars.left:value() then
-      velocity.x = velocity.x * restitution
+    if not springing and left == view.vars.left:value() and scroll ~= 'vertical' then
       if view.spring then
         view.springing = true
       end
+      velocity.x = velocity.x * restitution
       physics.target.x = left
       physics.target.y = top
     end
 
-    if not springing and top == view.vars.top:value() then
-      velocity.y = velocity.y * restitution
+    if not springing and top == view.vars.top:value() and scroll ~= 'horizontal' then
       if view.spring then
         view.springing = true
       end
+      velocity.y = velocity.y * restitution
       physics.target.x = left
       physics.target.y = top
     end
