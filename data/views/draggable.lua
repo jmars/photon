@@ -9,6 +9,7 @@ function Draggable:new(options)
   self.dragging = false
   self.anchorX = 0
   self.anchorY = 0
+  self.spring = true
   local S = core.solver
   S:addedit(self.vars.left, "required")
   S:addedit(self.vars.top, "required")

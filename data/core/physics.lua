@@ -113,14 +113,18 @@ function simulation.step()
 
     if not springing and left == view.vars.left:value() then
       velocity.x = velocity.x * restitution
-      view.springing = true
+      if view.spring then
+        view.springing = true
+      end
       physics.target.x = left
       physics.target.y = top
     end
 
     if not springing and top == view.vars.top:value() then
       velocity.y = velocity.y * restitution
-      view.springing = true
+      if view.spring then
+        view.springing = true
+      end
       physics.target.x = left
       physics.target.y = top
     end
