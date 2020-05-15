@@ -36,38 +36,39 @@ function core.init()
   S:addedit(core.root_view.vars.width, "required")
   S:addedit(core.root_view.vars.height, "required")
 
-  local boundaries = View()
-  boundaries:add_constraint(
-    boundaries.vars.top :eq (100) :strength "required",
-    boundaries.vars.left :eq (300) :strength "required",
-    boundaries.vars.height :eq (500) :strength "required",
-    boundaries.vars.width :eq (500) :strength "required"
+  local scroller = Draggable()
+  core.root_view:add_child(scroller)
+  scroller:add_constraint(
+    scroller.vars.top :eq (0) :strength "weak",
+    scroller.vars.left :eq (0) :strength "weak",
+    scroller.vars.width :eq (300),
+    scroller.vars.height :eq (600),
+    S:constraint()(scroller.vars.right) "<=" (core.root_view.vars.right)
   )
+  scroller.style.background_color = style.text
 
-  boundaries.style.background_color = { common.color "#111111" }
-
-  core.root_view:add_child(boundaries)
-
-  local test = Draggable()
-  test:add_constraint(
-    test.vars.width :eq (100) :strength "required",
-    test.vars.height :eq (100) :strength "required"
-  )
-  test.style.background_color = style.text
-  core.root_view:add_child(test)
-
-  core.solver:addedit(test.vars.left)
-
-  local test2 = View()
-  boundaries:add_child(test2)
-  test2.style.background_color = style.selection
-  test2:add_constraint(
-    S:constraint()(test2.vars.left) ">=" (test.vars.right + 100) :strength "medium",
-    S:constraint()(test2.vars.left) "==" (test.vars.right) :strength "medium",
-    S:constraint()(test2.vars.top) "==" (test.vars.top) :strength "medium",
-    test2.vars.width :eq (100) :strength "required",
-    test2.vars.height :eq (100) :strength "required"
-  )
+  -- local last = nil
+  -- for i=1,10 do  
+  --   local drag = View()
+  --   drag.style.background_color = style.text
+  --   drag:add_constraint(
+  --     drag.vars.width :eq (200),
+  --     drag.vars.height :eq (50)
+  --   )
+  --   if last ~= nil then
+  --     drag:add_constraint(
+  --       drag.vars.top :eq (last.vars.bottom + 10),
+  --       drag.vars.left :eq (last.vars.left)
+  --     )
+  --   else
+  --     drag:add_constraint(
+  --       drag.vars.top :eq (scroller.vars.top) :strength "weak",
+  --       drag.vars.left :eq (scroller.vars.left) :strength "weak"
+  --     )
+  --   end
+  --   last = drag
+  --   scroller:add_child(drag)
+  -- end
 
   core.active_view = core.root_view
   core.add_thread(simulation.thread)

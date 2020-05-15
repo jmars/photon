@@ -27,6 +27,7 @@ function View:new()
   local height = S:var (num .. "height")
   local centerX = S:var (num .. "centerX")
   local centerY = S:var (num .. "centerY")
+  local mass = S:var (num .. "mass")
 
   local constraints = {
     width :eq (right - left) :strength "required",
@@ -36,7 +37,8 @@ function View:new()
     S:constraint()(left) "<=" (right) :strength "required",
     S:constraint()(top) "<=" (bottom) :strength "required",
     S:constraint()(left) ">=" (0) :strength "required",
-    S:constraint()(top) ">=" (0) :strength "required"
+    S:constraint()(top) ">=" (0) :strength "required",
+    mass :eq (width + height) :strength "required"
   }
   
   self.constraints = {}
@@ -54,7 +56,7 @@ function View:new()
   }
 
   self.physics = {
-    mass = 1,
+    mass = mass,
     velocity = { x = 0, y = 0 },
     restitution = -0.7,
     target = { x = 0, y = 0 }

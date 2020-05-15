@@ -17,7 +17,7 @@ local Cd = 0.47 -- dimensionless
 local rho = 1.22 -- fluid density
 -- local ag = 9.81 -- gravity
 local ag = 0
-local frameRate = 1/40
+local frameRate = 1/60
 local drag = 0.01
 local k = -30 -- Spring stiffness, in kg / s^2 
 local b = -30 -- Damping constant, in kg / s
@@ -50,7 +50,7 @@ function simulation.step()
     end
 
     local velocity = view.physics.velocity
-    local mass = view.physics.mass
+    local mass = view.physics.mass:value()
     local area = (view.vars.width:value() * view.vars.height:value()) / 10000
     local left = math.abs(view.vars.left:value())
     local top = math.abs(view.vars.top:value())
@@ -76,11 +76,11 @@ function simulation.step()
       ax = fx / mass
       ay = ag + (fy / mass)
     else
-      local springX = k * (left - physics.target.x)
-      local damperX = b * velocity.x
+      local springX = (k * mass) * (left - physics.target.x)
+      local damperX = (b * mass) * velocity.x
       ax = (springX + damperX) / mass
-      local springY = k * (top - physics.target.y)
-      local damperY = b * velocity.y
+      local springY = (k * mass) * (top - physics.target.y)
+      local damperY = (b * mass) * velocity.y
       ay = (springY + damperY) / mass
     end
 
