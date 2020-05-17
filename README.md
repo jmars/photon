@@ -7,7 +7,7 @@ pulled out for building small apps. Lua POC replaced with luajit and the cassowa
 * Event handling with local and global methods
 * Constraint based layout using the cassowary linear constraint solver (which is respected by the physics engine)
 
-![WIP Image](https://github.com/jmars/photon/example.gif)
+![WIP](https://github.com/jmars/photon/raw/master/example.gif)
 
 ## TODO
 * Set of basic components
