@@ -18,7 +18,7 @@ function core.init()
   simulation.init()
   
   View = require "core.view"
-  local Draggable = require 'views.draggable'
+  local ScrollView = require 'views.scrollview'
 
   --renderer.show_debug(true)
   core.frame_start = 0
@@ -36,44 +36,24 @@ function core.init()
   S:addedit(core.root_view.vars.width, "required")
   S:addedit(core.root_view.vars.height, "required")
 
-  local scroller = Draggable()
-  core.root_view:add_child(scroller)
-  scroller:add_constraint(
-    scroller.vars.top :eq (0) :strength "weak",
-    scroller.vars.left :eq (0) :strength "weak",
-    scroller.vars.width :eq (200)
+  local test = ScrollView("vertical")
+  test:add_constraint(
+    test.vars.left :eq (0),
+    test.vars.top :eq (0),
+    test.vars.width :eq (200),
+    test.vars.height :eq (600)
   )
-  scroller.scroll = 'vertical'
 
-  local last = nil
-  for i=1,10 do  
-    local drag = View()
-    drag.style.background_color = style.text
-    drag:add_constraint(
-      drag.vars.width :eq (200),
-      drag.vars.height :eq (50)
-    )
-    if last ~= nil then
-      drag:add_constraint(
-        drag.vars.top :eq (last.vars.bottom + 10),
-        drag.vars.left :eq (last.vars.left)
-      )
-    else
-      drag:add_constraint(
-        drag.vars.top :eq (scroller.vars.top) :strength "weak",
-        drag.vars.left :eq (scroller.vars.left) :strength "weak"
-      )
-    end
-    last = drag
-    scroller:add_child(drag)
-  end
-
-  scroller:add_constraint(
-    S:constraint()(scroller.vars.bottom) ">=" (core.root_view.vars.top + 100),
-    S:constraint()(scroller.vars.top) "<=" (core.root_view.vars.bottom - 100),
-    scroller.vars.left :eq (0),
-    scroller.vars.height :eq (last.vars.bottom - scroller.children[1].vars.top)
+  local test2 = View()
+  test2:add_constraint(
+    test.vars.left :eq (0),
+    test.vars.top :eq (0),
+    test2.vars.width :eq (100),
+    test2.vars.height :eq (100)
   )
+  test:add_child(test2)
+
+  core.root_view:add_child(test)
 
   core.active_view = core.root_view
   core.add_thread(simulation.thread)

@@ -236,7 +236,6 @@ end
 function View:add_child(child)
   table.insert(self.children, child)
   child.parent = self
-  local S = core.solver
   return child
 end
 
