@@ -1,6 +1,6 @@
 # Photon
 A fork of the [lite](https://github.com/rxi/lite) editor with just the core
-pulled out for building small apps. Lua POC replaced with luajit and the cassowary constraint solver (amoeba) have been added.
+pulled out for building small apps. With the goal of putting together simple concepts in a way that works better than the sum of the parts.
 
 ## Current Features
 * View physics animation via a first degree ODE solver

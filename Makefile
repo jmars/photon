@@ -18,3 +18,6 @@ src/lib/luajit/src/libluajit.a:
 clean:
 	rm $(objects)
 	$(MAKE) -C src/lib/luajit clean
+
+test:
+	busted -m ./data/?.lua data/**/*.test.lua
