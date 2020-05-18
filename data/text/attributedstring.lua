@@ -1,26 +1,5 @@
 local Object = require 'core.object'
-
-
-local RangeEntry = Object:extend()
-
-
-function RangeEntry:new(tag, start, length)
-  self.tag = tag
-  self.start = start
-  self.length = length
-end
-
-
-function RangeEntry:indexInside(index)
-  return start >= index and index < (start + length)
-end
-
-
-function RangeEntry:rangeInside(start, length)
-  local finish = self.start + self.length
-  local stringFinish = start + length
-  return start >= self.start and stringFinish < finish
-end
+local RangeEntry = require 'text.rangeentry'
 
 
 local AttributedString = Object:extend()
@@ -47,35 +26,72 @@ end
 
 
 function AttributedString:removeTextAt(start, length)
+  if length == nil then
+    length = #self.string - start + 1
+  end
   local begin = self.string:sub(1, start - 1)
   local finish = self.string:sub(start + length)
   self.string = begin .. finish
+  self:removeAttributeAt(nil, start, length)
   for i=1,#self.rangeEntries do
-    ::start::
-    local range = self.rangeEntries[i]
-    if range == nil then
-      goto exit
-    end
-    if range:rangeInside(start, length) then
-      local diff = start - range.start
-      range.length = range.length - diff
-      if range.length <= 0 then
-        table.remove(i)
-        goto start
-      end
+    local entry = self.rangeEntries[i]
+    if entry.start > start then
+      entry.start = entry.start - length
     end
   end
-  ::exit::
+  self:sort()
 end
 
 
 function AttributedString:addAttributeAt(tag, start, length)
+  local entry = RangeEntry(tag, start, length)
+  table.insert(self.rangeEntries, entry)
+  self:sort()
+end
 
+
+function AttributedString:sort()
+  local entries = {}
+  for i=1,#self.rangeEntries do
+    local entry = self.rangeEntries[i]
+    if entry.length > 0 and entry.start >= 0 then
+      table.insert(entries, entry)
+    end
+  end
+  self.rangeEntries = entries
+end
+
+
+function AttributedString:attributesAt(index)
+  local entries = {}
+  for i=1,#self.rangeEntries do
+    local entry = self.rangeEntries[i]
+    if entry:indexInside(index) then
+      table.insert(entries, entry)
+    end
+  end
+  return entries
 end
 
 
 function AttributedString:removeAttributeAt(tag, start, length)
-
+  local effected = self:attributesAt(start)
+  local entries = {}
+  for i=1,#effected do
+    local entry = effected[i]
+    if entry.tag == tag or tag == nil then
+      entry.length = 0
+      local left, right = entry:splitRangeAt(start, length)
+      if left.length > 0 then
+        table.insert(entries, left)
+      end
+      if right.length > 0 then
+        table.insert(entries, right)
+      end
+    end
+  end
+  self.rangeEntries = entries
+  self:sort()
 end
 
 
