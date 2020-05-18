@@ -9,11 +9,13 @@ local Object = require "core.object"
 
 local View = Object:extend()
 
+
 local count = 0
 local function inc()
   count = count + 1
   return count
 end
+
 
 function View:new()
   local S = core.solver
@@ -83,6 +85,13 @@ function View:add_constraint(...)
     table.insert(self.constraints, constraint)
     S:addconstraint(constraint)
   end
+end
+
+
+function View:hit_test(x, y)
+  local vl, vt = self.vars.left:value(), self.vars.top:value()
+  local vr, vb = self.vars.right:value(), self.vars.bottom:value()
+  return x >= vl and x <= vr and y >= vt and y <= vb
 end
 
 

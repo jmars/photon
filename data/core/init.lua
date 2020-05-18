@@ -18,7 +18,7 @@ function core.init()
   simulation.init()
   
   View = require "core.view"
-  local ScrollView = require 'views.scrollview'
+  local Draggable = require 'views.draggable'
 
   --renderer.show_debug(true)
   core.frame_start = 0
@@ -36,22 +36,12 @@ function core.init()
   S:addedit(core.root_view.vars.width, "required")
   S:addedit(core.root_view.vars.height, "required")
 
-  local test = ScrollView("vertical")
+  local test = Draggable()
   test:add_constraint(
-    test.vars.left :eq (0),
-    test.vars.top :eq (0),
     test.vars.width :eq (200),
     test.vars.height :eq (600)
   )
-
-  local test2 = View()
-  test2:add_constraint(
-    test.vars.left :eq (0),
-    test.vars.top :eq (0),
-    test2.vars.width :eq (100),
-    test2.vars.height :eq (100)
-  )
-  test:add_child(test2)
+  test.style.background_color = style.text
 
   core.root_view:add_child(test)
 

@@ -15,9 +15,7 @@ function events.hit_test_thread()
     local x, y = coroutine.yield(nil)
     for i=1,#events.views do
       local view = events.views[i]
-      local vl, vt = view.vars.left:value(), view.vars.top:value()
-      local vr, vb = view.vars.right:value(), view.vars.bottom:value()
-      if x >= vl and x <= vr and y >= vt and y <= vb then
+      if view:hit_test(x, y) then
         coroutine.yield(view)
       end
     end
@@ -28,6 +26,7 @@ end
 function events.add_view(view)
   table.insert(events.views, view)
 end
+
 
 function events.on_mouse_pressed(button, x, y, clicks)
   local _, view = coroutine.resume(events.thread, x, y)
@@ -82,5 +81,6 @@ function events.on_mouse_wheel(y)
     view:on_mouse_wheel(y)
   end
 end
+
 
 return events
