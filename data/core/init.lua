@@ -53,11 +53,20 @@ function core.init()
   textview:add_constraint(
     textview.vars.top :eq (0),
     textview.vars.left :eq (0),
-    textview.vars.width :eq (140),
+    textview.vars.width :eq (160),
     textview.vars.height :eq (100)
   )
 
   textview.style.background_color = style.dim
+
+  local child = View()
+  child:add_constraint(
+    child.vars.top :eq (0),
+    child.vars.left :eq (0),
+    child.vars.width :eq (20),
+    child.vars.height :eq (47)
+  )
+  textview:add_child(child)
 
   local container = TextContainer(textview)
 

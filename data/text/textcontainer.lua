@@ -50,8 +50,8 @@ function TextContainer:maybeGetLine(width, height, y1, x)
       x = er + 1
 
       -- check if we have enough space now
-      if (next - x) >= width then
-        return x, y1, (next - x)
+      if (limit - x) >= width then
+        return x, y1, (limit - x)
       end
     end
 
