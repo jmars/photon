@@ -12,7 +12,7 @@ end
 
 
 function RangeEntry:indexInside(index)
-  return index >= self.start or index < (self.start + self.length)
+  return index >= self.start and index < (self.start + self.length)
 end
 
 

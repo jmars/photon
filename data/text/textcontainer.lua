@@ -4,7 +4,7 @@ local Object = require 'core.object'
 local TextContainer = Object:extend()
 
 
-function TextContainer:new(view, exclusions)
+function TextContainer:new(view)
   self.view = view
 end
 

@@ -1,4 +1,5 @@
 local AttributedString = require 'text.attributedstring'
+local RangeEntry = require 'text.rangeentry'
 
 describe("AttributedString", function()
   it(":new(string)", function()
@@ -52,5 +53,19 @@ describe("AttributedString", function()
     assert.equal(string.rangeEntries[1].length, 1)
     assert.equal(string.rangeEntries[2].start, 4)
     assert.equal(string.rangeEntries[2].length, 3)
+  end)
+
+  it(":chunks()", function()
+    local string = AttributedString("foobar")
+    string:addAttributeAt("BOLD", 1, 3)
+    string:addAttributeAt("ITALIC", 2, 5)
+    local chunks = string:chunks()
+    local bold = RangeEntry("BOLD", 1, 3)
+    local italic = RangeEntry("ITALIC", 2, 5)
+    assert.same({
+      { 'f', { bold }, 1 },
+      { 'oo', { bold, italic }, 2 },
+      { 'bar', { italic }, 4 }
+    }, chunks)
   end)
 end)

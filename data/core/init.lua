@@ -14,6 +14,8 @@ local core = {}
 function core.init()
   events.init()
 
+  print(style.font:get_width("hello"))
+
   local simulation = require 'core.physics'
   simulation.init()
   

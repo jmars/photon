@@ -51,6 +51,7 @@ end
 
 
 function AttributedString:sort()
+  -- remove empty ranges
   local entries = {}
   for i=1,#self.rangeEntries do
     local entry = self.rangeEntries[i]
@@ -58,6 +59,9 @@ function AttributedString:sort()
       table.insert(entries, entry)
     end
   end
+  -- sort by start index
+  table.sort(entries, function(a, b) return a.start < b.start end)
+  
   self.rangeEntries = entries
 end
 
@@ -92,6 +96,36 @@ function AttributedString:removeAttributeAt(tag, start, length)
   end
   self.rangeEntries = entries
   self:sort()
+end
+
+
+function AttributedString:chunks()
+  -- find points where ranges overlap
+  local breaks = {}
+  for i=1,#self.rangeEntries do
+    local entry = self.rangeEntries[i]
+    table.insert(breaks, entry.start)
+    table.insert(breaks, entry.start + entry.length)
+  end
+
+  -- sort by index
+  table.sort(breaks)
+
+  -- take the slices
+  local chunks = {}
+  for i=1,#breaks do
+    local span = breaks[i]
+    local next = breaks[i+1]
+    if next ~= nil then
+      next = next - 1
+    end
+    local string = self.string:sub(span, next)
+    local attributes = self:attributesAt(span)
+    if string ~= '' then
+      table.insert(chunks, { string, attributes, span })
+    end
+  end
+  return chunks
 end
 
 
