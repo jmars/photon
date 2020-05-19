@@ -59,6 +59,7 @@ function AttributedString:sort()
       table.insert(entries, entry)
     end
   end
+  
   -- sort by start index
   table.sort(entries, function(a, b) return a.start < b.start end)
   

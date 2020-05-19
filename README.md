@@ -6,6 +6,7 @@ pulled out for building small apps. With the goal of putting together simple con
 * View physics animation via a first degree ODE solver
 * Event handling with local and global methods
 * Constraint based layout using the cassowary linear constraint solver (which is respected by the physics engine)
+* Multi-container text layout ala iOS TextKit, with batched rendering
 
 ![WIP](https://github.com/jmars/photon/raw/master/example.gif)
 
@@ -13,4 +14,4 @@ pulled out for building small apps. With the goal of putting together simple con
 * Set of basic components
 * Script to build self contained app
 * Networking
-* Text layout engine
+* Example HN reader app
