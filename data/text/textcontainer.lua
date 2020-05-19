@@ -29,6 +29,13 @@ function TextContainer:maybeGetLine(width, height, y1, x)
   -- check all of the exclusions to see if we are inside them
   for i=1,#exclusions do
     local exclusion = exclusions[i]
+
+    -- optimization: skip obvious bad candidates
+    if y1 > exclusion.vars.bottom:value()
+    or y2 < exclusion.vars.top:value() then
+      goto continue
+    end
+
     local next = exclusion[i + 1]
     local limit = next ~= nil and next.vars.left:value() or right
     local er = exclusion.vars.right:value()
@@ -47,6 +54,8 @@ function TextContainer:maybeGetLine(width, height, y1, x)
         return x, y1, (next - x)
       end
     end
+
+    ::continue::
   end
 
   if (x - right) >= size then
