@@ -68,4 +68,14 @@ describe("AttributedString", function()
       { 'bar', { italic }, 4 }
     }, chunks)
   end)
+
+  it(":chunks() | one span", function()
+    local string = AttributedString("foobar")
+    string:addAttributeAt("BOLD", 1, 6)
+    local chunks = string:chunks()
+    local bold = RangeEntry("BOLD", 1, 6)
+    assert.same({
+      { 'foobar', { bold }, 1 }
+    }, chunks)
+  end)
 end)

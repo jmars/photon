@@ -5,6 +5,9 @@ local config = require "core.config"
 local style = require "core.style"
 local events = require "core.events"
 local common = require "core.common"
+local LayoutManager = require "text.layoutmanager"
+local AttributedString = require "text.attributedstring"
+local TextContainer = require "text.textcontainer"
 local View
 
 
@@ -14,13 +17,12 @@ local core = {}
 function core.init()
   events.init()
 
-  print(style.font:get_width("hello"))
-
   local simulation = require 'core.physics'
   simulation.init()
   
   View = require "core.view"
   local Draggable = require 'views.draggable'
+  local TextView = require 'text.view'
 
   --renderer.show_debug(true)
   core.frame_start = 0
@@ -38,14 +40,32 @@ function core.init()
   S:addedit(core.root_view.vars.width, "required")
   S:addedit(core.root_view.vars.height, "required")
 
-  local test = Draggable()
-  test:add_constraint(
-    test.vars.width :eq (200),
-    test.vars.height :eq (600)
-  )
-  test.style.background_color = style.text
 
-  core.root_view:add_child(test)
+  local text = AttributedString("test")
+  text:addAttributeAt({
+    name = "font",
+    lineHeight = 48,
+    size = 36
+  }, 1, 4)
+  local manager = LayoutManager(text)
+  local textview = TextView()
+
+  textview:add_constraint(
+    textview.vars.top :eq (0),
+    textview.vars.left :eq (0),
+    textview.vars.width :eq (500),
+    textview.vars.height :eq (500)
+  )
+
+  textview.style.background_color = style.dim
+
+  local container = TextContainer(textview)
+
+  manager:addContainer(container)
+  core.solver:update()
+  manager:layout()
+
+  core.root_view:add_child(textview)
 
   core.active_view = core.root_view
   core.add_thread(simulation.thread)

@@ -1,5 +1,6 @@
 local Object = require 'core.object'
-
+local style = require 'core.style'
+local fontloader = require 'text.fontloader'
 
 local LayoutManager = Object:extend()
 
@@ -15,20 +16,20 @@ function LayoutManager:addContainer(container)
 end
 
 
-function LayoutManager.runLayout()
+function LayoutManager:layout()
   local containerIndex = 1
   local container = self.containers[containerIndex]
   local chunks = self.text:chunks()
   local y = nil
   local x = nil
   local gap = 0
-  local batch = {}
+  local batches = { { container = container, words = {} } }
 
   for i=1,#chunks do
     local chunk = chunks[i]
     local words = chunk[1]:gmatch('%S+')
     local attrs = chunk[2]
-    local fontConfig = attrs[#attrs] -- just take last for now, no inheritance
+    local fontConfig = attrs[#attrs].tag -- just take last for now, no inheritance
     local font = fontloader.load(fontConfig.name, fontConfig.size)
     local lineHeight = fontConfig.lineHeight
     local spaceWidth = font:get_width(" ")
@@ -44,7 +45,7 @@ function LayoutManager.runLayout()
         x, y, gap = container:maybeGetLine(width, lineHeight, y, x)
 
         -- we have no width left but there may be space for a new line
-        if x == 0 then
+        if x == -1 then
           x = nil
           y = y + lineHeight
           goto retry
@@ -53,21 +54,21 @@ function LayoutManager.runLayout()
         -- left the bounds of the container, try to get the next one
         if x == nil then
           containerIndex = containerIndex + 1
-          container == self.containers[containerIndex]
+          container = self.containers[containerIndex]
 
           -- uh oh, no containers left
           if container == nil then
             -- we have run out of space for text
-            goto end -- just bail out
+            goto finish -- just bail out
           end
 
           -- we found one, let the loop run again
-          table.insert(batch, { container = container, words = {} })
+          table.insert(batches, { container = container, words = {} })
         end
       end
 
       -- we found a space! add it to the batch and
-      table.insert(batch[#batch].words, {
+      table.insert(batches[#batches].words, {
         x = x,
         y = y + (lineHeight / 2) - (height / 2),
         text = word,
@@ -79,17 +80,18 @@ function LayoutManager.runLayout()
     end
   end
 
-  ::end::
+  ::finish::
 
   -- gather all of the render batches and send them to the views
-  for i=1,#batch do
+  for i=1,#batches do
+    local batch = batches[i]
     local container = batch.container
     local words = batch.words
     container:setBatch(function()
       -- keep this loop small, it could be run every frame in the worst case
       for i=1,#words do
         local word = words[i]
-        renderer.draw_text(word.font, word.text, word.x, word.y)
+        renderer.draw_text(word.font, word.text, word.x, word.y, style.text)
       end
     end)
   end

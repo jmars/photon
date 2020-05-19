@@ -11,7 +11,7 @@ end
 
 function TextContainer:maybeGetLine(width, height, y1, x)
   if y1 == nil then
-    y1 == self.view.vars.top:value()
+    y1 = self.view.vars.top:value()
   end
 
   if x == nil then
@@ -50,7 +50,7 @@ function TextContainer:maybeGetLine(width, height, y1, x)
       x = er + 1
 
       -- check if we have enough space now
-      if (next - x) >= size then
+      if (next - x) >= width then
         return x, y1, (next - x)
       end
     end
@@ -58,21 +58,21 @@ function TextContainer:maybeGetLine(width, height, y1, x)
     ::continue::
   end
 
-  if (x - right) >= size then
-    return x, y1, (x - right)
+  if (right - x) >= width then
+    return x, y1, (right - x)
   else
-    return x, y1, 0
+    return -1, y1, 0
   end
 end
 
 
 function TextContainer:setBatch(render)
   -- views know nothing about how text is rendered
-  table.insert(self.view.text, render)
+  self.view.text = render
 end
 
 
-function reset()
+function TextContainer:reset()
   self.view.text = {}
 end
 
