@@ -40,13 +40,14 @@ function core.init()
   S:addedit(core.root_view.vars.width, "required")
   S:addedit(core.root_view.vars.height, "required")
 
+  local testString = "test test test test test test"
 
-  local text = AttributedString("test test test")
+  local text = AttributedString(testString)
   text:addAttributeAt({
     name = "font",
     lineHeight = 48,
     size = 36
-  }, 1, 14)
+  }, 1, #testString)
   local manager = LayoutManager(text)
   local textview = TextView()
 
@@ -71,9 +72,25 @@ function core.init()
   local container = TextContainer(textview)
 
   manager:addContainer(container)
+
+  local textview2 = TextView()
+  textview2:add_constraint(
+    textview2.vars.top :eq (300),
+    textview2.vars.left :eq (300),
+    textview2.vars.width :eq (150),
+    textview2.vars.height :eq (100)
+  )
+  
+  textview2.style.background_color = style.dim
+
+  local container2 = TextContainer(textview2)
+
+  manager:addContainer(container2)
+
   core.solver:update()
   manager:layout()
 
+  core.root_view:add_child(textview2)
   core.root_view:add_child(textview)
 
   core.active_view = core.root_view

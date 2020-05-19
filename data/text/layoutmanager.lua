@@ -37,7 +37,6 @@ function LayoutManager:layout()
 
     for word in words do
       local width = font:get_width(word)
-      print(x, y, gap)
 
       -- try to find a viable space candidate
       while gap < width do
@@ -56,6 +55,7 @@ function LayoutManager:layout()
         if x == nil then
           containerIndex = containerIndex + 1
           container = self.containers[containerIndex]
+          gap = 0
 
           -- uh oh, no containers left
           if container == nil then
