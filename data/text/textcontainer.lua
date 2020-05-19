@@ -72,6 +72,12 @@ function TextContainer:setBatch(render)
 end
 
 
+function TextContainer:getBounds()
+  local vars = self.view.vars
+  return vars.left:value(), vars.top:value(), vars.right:value(), vars.bottom:value()
+end
+
+
 function TextContainer:reset()
   self.view.text = {}
 end

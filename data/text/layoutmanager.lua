@@ -69,9 +69,10 @@ function LayoutManager:layout()
       end
 
       -- we found a space! add it to the batch and
+      local l, t = container:getBounds()
       table.insert(batches[#batches].words, {
-        x = x,
-        y = y + (lineHeight / 2) - (height / 2),
+        x = x - l,
+        y = (y + (lineHeight / 2) - (height / 2)) - t,
         text = word,
         font = font
       })
@@ -90,11 +91,11 @@ function LayoutManager:layout()
     local batch = batches[i]
     local container = batch.container
     local words = batch.words
-    container:setBatch(function()
+    container:setBatch(function(x, y)
       -- keep this loop small, it could be run every frame in the worst case
       for i=1,#words do
         local word = words[i]
-        renderer.draw_text(word.font, word.text, word.x, word.y, style.text)
+        renderer.draw_text(word.font, word.text, x + word.x, y + word.y, style.text)
       end
     end)
   end

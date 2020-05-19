@@ -15,7 +15,7 @@ end
 
 function TextView:draw()
   TextView.super.draw(self)
-  self.text()
+  self.text(self.vars.left:value(), self.vars.top:value())
 end
 
 
