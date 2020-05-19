@@ -41,20 +41,20 @@ function core.init()
   S:addedit(core.root_view.vars.height, "required")
 
 
-  local text = AttributedString("test")
+  local text = AttributedString("test test test")
   text:addAttributeAt({
     name = "font",
     lineHeight = 48,
     size = 36
-  }, 1, 4)
+  }, 1, 14)
   local manager = LayoutManager(text)
   local textview = TextView()
 
   textview:add_constraint(
     textview.vars.top :eq (0),
     textview.vars.left :eq (0),
-    textview.vars.width :eq (500),
-    textview.vars.height :eq (500)
+    textview.vars.width :eq (140),
+    textview.vars.height :eq (100)
   )
 
   textview.style.background_color = style.dim

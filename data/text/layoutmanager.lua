@@ -37,6 +37,7 @@ function LayoutManager:layout()
 
     for word in words do
       local width = font:get_width(word)
+      print(x, y, gap)
 
       -- try to find a viable space candidate
       while gap < width do
@@ -77,6 +78,7 @@ function LayoutManager:layout()
 
       -- move our requested x right as we have something there now
       x = x + width + spaceWidth
+      gap = gap - width - spaceWidth
     end
   end
 
@@ -84,6 +86,7 @@ function LayoutManager:layout()
 
   -- gather all of the render batches and send them to the views
   for i=1,#batches do
+    -- TODO: relative offsets
     local batch = batches[i]
     local container = batch.container
     local words = batch.words
