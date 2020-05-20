@@ -88,13 +88,6 @@ function View:add_constraint(...)
 end
 
 
-function View:hit_test(x, y)
-  local vl, vt = self.vars.left:value(), self.vars.top:value()
-  local vr, vb = self.vars.right:value(), self.vars.bottom:value()
-  return x >= vl and x <= vr and y >= vt and y <= vb
-end
-
-
 function View:move_towards(t, k, dest, rate)
   if type(t) ~= "table" then
     return self:move_towards(self, t, k, dest, rate)

@@ -107,17 +107,6 @@ function core.quit(force)
 end
 
 
-function core.reload_module(name)
-  local old = package.loaded[name]
-  package.loaded[name] = nil
-  local new = require(name)
-  if type(old) == "table" then
-    for k, v in pairs(new) do old[k] = v end
-    package.loaded[name] = old
-  end
-end
-
-
 function core.add_thread(f, weak_ref)
   local key = weak_ref or #core.threads + 1
   local fn = function() return core.try(f) end
@@ -207,23 +196,6 @@ end
 
 
 function core.step()
-  -- handle events
-  local mouse_moved = false
-  local mouse = { x = 0, y = 0, dx = 0, dy = 0 }
-
-  for type, a,b,c,d in system.poll_event do
-    if type == "mousemoved" then
-      mouse_moved = true
-      mouse.x, mouse.y = a, b
-      mouse.dx, mouse.dy = mouse.dx + c, mouse.dy + d
-    else
-      local _, res = core.try(core.on_event, type, a, b, c, d)
-    end
-  end
-  if mouse_moved then
-    core.try(core.on_event, "mousemoved", mouse.x, mouse.y, mouse.dx, mouse.dy)
-  end
-
   local width, height = renderer.get_size()
 
   -- update
@@ -236,14 +208,6 @@ function core.step()
     return
   end
   core.redraw = false
-
-  -- update window title
-  local name = core.active_view:get_name()
-  if name ~= "---" then
-    system.set_window_title(name .. " - lite")
-  else
-    system.set_window_title("lite")
-  end
 
   -- draw
   renderer.begin_frame()
