@@ -104,23 +104,6 @@ function core.try(fn, ...)
 end
 
 
-function core.on_event(type, ...)
-  if type == "textinput" then
-    events.on_text_input(...)
-  elseif type == "mousemoved" then
-    events.on_mouse_moved(...)
-  elseif type == "mousepressed" then
-    events.on_mouse_pressed(...)
-  elseif type == "mousereleased" then
-    events.on_mouse_released(...)
-  elseif type == "mousewheel" then
-    events.on_mouse_wheel(...)
-  elseif type == "quit" then
-    core.quit()
-  end
-end
-
-
 local run_threads = coroutine.wrap(function()
   while true do
     local max_time = 1 / config.fps - 0.004
