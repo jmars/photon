@@ -11,11 +11,11 @@ local physics = require 'systems.physics'
 local render = require 'systems.render'
 local teardown = require 'systems.teardown'
 
-
 local Object = require 'core.object'
 
 
 local core = {}
+
 
 function core.init()
   Object.register_system(render)
@@ -60,7 +60,7 @@ function core.init()
     { "boxRender", "followMouse" }
   )
 
-  core.box = Object.create('box')
+  Object.create('box')
 end
 
 

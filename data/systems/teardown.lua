@@ -31,18 +31,22 @@ function teardown.register(trigger, obj)
       __gc = gc
     })
   else
-    mt.__gc = gc
+    local nmt = {
+      __gc = gc,
+      __index = mt
+    }
+    setmetatable(obj, nmt)
   end
 end
 
 
 function teardown.step()
-
+  -- runtime does this
 end
 
 
 function teardown.thread()
-
+  -- do nothing, the lua garbage collector does this
 end
 
 

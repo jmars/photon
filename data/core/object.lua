@@ -2,13 +2,20 @@ local systems = {}
 local objects = {}
 local instances = {}
 local behaviours = {}
+local tags = {}
 
 local Object = {}
 setmetatable(Object, Object)
 
 
-function Object.new(name, triggers, behaviours)
+function Object.tag_behaviours(name, behaviours)
+  tags[name] = behaviours
+end
+
+
+function Object.new(name, triggers, behaviours, tags)
   local obj = {
+    tags = tags or {},
     triggers = triggers,
     behaviours = behaviours
   }
@@ -58,11 +65,14 @@ end
 
 
 function Object.trigger(obj, event, ...)
-  for i=1,#obj.behaviours do
-    local behaviour = behaviours[obj.behaviours[i]]
+  for i=0,#obj.tags do
+    local bes = i == 0 and obj.behaviours or tags[obj.tags[i]]
+    for i=1,#bes do
+      local behaviour = behaviours[bes[i]]
 
-    if behaviour.triggers[event] then
-      behaviour.reaction(obj, event, ...)
+      if behaviour.triggers[event] then
+        behaviour.reaction(obj, event, ...)
+      end
     end
   end
 end
