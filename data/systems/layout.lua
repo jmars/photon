@@ -70,7 +70,8 @@ function layout.register(trigger, obj)
       centerX = centerX,
       centerY = centerY
     },
-    constraints = constraints
+    constraints = constraints,
+    solver = S
   }
 
   table.insert(layout.objects, obj)

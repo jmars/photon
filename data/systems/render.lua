@@ -1,4 +1,5 @@
 local Object = require 'core.object'
+local style = require 'core.style'
 
 
 local render = {}
@@ -50,6 +51,8 @@ function render.step()
   renderer.begin_frame()
   render.clip_rect_stack[1] = { 0, 0, width, height }
   renderer.set_clip_rect(table.unpack(render.clip_rect_stack[1]))
+
+  renderer.draw_rect(0, 0, width, height, style.white)
 
   for i=1,#render.objects do
     local obj = render.objects[i]

@@ -21,6 +21,7 @@ function core.init()
   Object.register_system(render)
   Object.register_system(events)
   Object.register_system(layout)
+  Object.register_system(physics)
 
   --renderer.show_debug(true)
   core.frame_start = 0
@@ -29,23 +30,35 @@ function core.init()
   core.add_thread(render.thread)
   core.add_thread(events.thread)
   core.add_thread(layout.thread)
+  core.add_thread(physics.thread)
 
-  Object.behaviour("boxLayout", { "initLayout" }, function(obj, _, S, addConstraint)
-    local vars = obj.layout.vars
-    addConstraint(obj, vars.left :eq (0))
-    addConstraint(obj, vars.top :eq (0))
-    addConstraint(obj, vars.width :eq (100))
-    addConstraint(obj, vars.height :eq (100))
+  Object.behaviour("boxRender", { "initLayout", "draw" }, function(obj, _, S, addConstraint)
+    if _ == "initLayout" then
+      local vars = obj.layout.vars
+      addConstraint(obj, vars.left :eq (0) :strength "weak")
+      addConstraint(obj, vars.top :eq (0) :strength "weak")
+      addConstraint(obj, vars.width :eq (100))
+      addConstraint(obj, vars.height :eq (100))
+    else
+      local vars = obj.layout.vars
+      local x, y = vars.left:value(), vars.top:value()
+      local w, h = vars.width:value(), vars.height:value()
+      renderer.draw_rect(x, y, w, h, style.background)
+    end
   end)
 
-  Object.behaviour("boxDraw", { "draw" }, function(obj, _, width, height)
+  Object.behaviour("followMouse", { "global_mouse_moved" }, function(obj, _, x, y, dx, dy)
     local vars = obj.layout.vars
-    local x, y = vars.left:value(), vars.top:value()
-    local w, h = vars.width:value(), vars.height:value()
-    renderer.draw_rect(x, y, w, h, style.background)
+    local S = obj.layout.solver
+    S:suggest(vars.left, x, "required")
+    S:suggest(vars.top, y, "required")
   end)
 
-  Object.new("box", { "initLayout", "draw" }, { "boxLayout", "boxDraw" })
+  Object.new(
+    "box",
+    { "initLayout", "draw", "global_mouse_moved" },
+    { "boxRender", "followMouse" }
+  )
 
   core.box = Object.create('box')
 end

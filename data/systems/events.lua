@@ -36,8 +36,8 @@ end
 
 
 local function hit_test(x, y, obj)
-  local vl, vt = obj.vars.left:value(), obj.vars.top:value()
-  local vr, vb = obj.vars.right:value(), obj.vars.bottom:value()
+  local vl, vt = obj.layout.vars.left:value(), obj.layout.vars.top:value()
+  local vr, vb = obj.layout.vars.right:value(), obj.layout.vars.bottom:value()
 
   return x >= vl and x <= vr and y >= vt and y <= vb
 end
@@ -93,14 +93,16 @@ end
 
 
 function events.on_mouse_moved(x, y, dx, dy)
-  for i=1,2 do
-    local event = i == 1 and "mouse_moved" or "global_mouse_moved"
-    local _, obj = coroutine.resume(events.hit_test_thread, event, x, y)
-    
-    while obj ~= nil do
-      Object.trigger(obj, event, x, y, dx, dy)
-      _, obj = coroutine.resume(events.hit_test_thread, x, y)
-    end
+  local _, obj = coroutine.resume(events.hit_test_thread, "mouse_moved", x, y)
+  
+  while obj ~= nil do
+    Object.trigger(obj, "mouse_moved", x, y, dx, dy)
+    _, obj = coroutine.resume(events.hit_test_thread, x, y)
+  end
+
+  for i=1,#events.objects.global_mouse_moved do
+    local obj = events.objects.global_mouse_moved[i]
+    Object.trigger(obj, "global_mouse_moved", x, y, dx, dx)
   end
 end
 
