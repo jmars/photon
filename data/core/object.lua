@@ -7,11 +7,10 @@ local Object = {}
 setmetatable(Object, Object)
 
 
-function Object.new(name, triggers, behaviours, init)
+function Object.new(name, triggers, behaviours)
   local obj = {
     triggers = triggers,
-    behaviours = behaviours,
-    init = init
+    behaviours = behaviours
   }
   obj.__index = obj
   objects[name] = obj

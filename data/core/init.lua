@@ -3,107 +3,51 @@ require "core.strict"
 require "core.nan"
 local config = require "core.config"
 local style = require "core.style"
-local events = require "core.events"
 local common = require "core.common"
-local LayoutManager = require "text.layoutmanager"
-local AttributedString = require "text.attributedstring"
-local TextContainer = require "text.textcontainer"
-local View
+
+local events = require 'systems.events'
+local layout = require 'systems.layout'
+local physics = require 'systems.physics'
+local render = require 'systems.render'
+local teardown = require 'systems.teardown'
+
+
+local Object = require 'core.object'
 
 
 local core = {}
 
-
 function core.init()
-  events.init()
-
-  local simulation = require 'core.physics'
-  simulation.init()
-  
-  View = require "core.view"
-  local Draggable = require 'views.draggable'
-  local TextView = require 'text.view'
+  Object.register_system(render)
+  Object.register_system(events)
+  Object.register_system(layout)
 
   --renderer.show_debug(true)
   core.frame_start = 0
-  core.clip_rect_stack = {{ 0,0,0,0 }}
   core.threads = setmetatable({}, { __mode = "k" })
-  core.solver = amoeba.new()
-  local S = core.solver
-  S:autoupdate(false)
 
-  core.root_view = View()
-  core.root_view:add_constraint(
-    core.root_view.vars.left :eq (0) :strength "required",
-    core.root_view.vars.top :eq (0) :strength "required"
-  )
-  S:addedit(core.root_view.vars.width, "required")
-  S:addedit(core.root_view.vars.height, "required")
+  core.add_thread(render.thread)
+  core.add_thread(events.thread)
+  core.add_thread(layout.thread)
 
-  local testString = "test test test test test test"
+  Object.behaviour("boxLayout", { "initLayout" }, function(obj, _, S, addConstraint)
+    local vars = obj.layout.vars
+    addConstraint(obj, vars.left :eq (0))
+    addConstraint(obj, vars.top :eq (0))
+    addConstraint(obj, vars.width :eq (100))
+    addConstraint(obj, vars.height :eq (100))
+  end)
 
-  local text = AttributedString(testString)
-  text:addAttributeAt({
-    name = "font",
-    lineHeight = 48,
-    size = 36
-  }, 1, #testString)
-  local manager = LayoutManager(text)
-  local textview = TextView()
+  Object.behaviour("boxDraw", { "draw" }, function(obj, _, width, height)
+    local vars = obj.layout.vars
+    local x, y = vars.left:value(), vars.top:value()
+    local w, h = vars.width:value(), vars.height:value()
+    renderer.draw_rect(x, y, w, h, style.background)
+  end)
 
-  textview:add_constraint(
-    textview.vars.top :eq (0),
-    textview.vars.left :eq (0),
-    textview.vars.width :eq (160),
-    textview.vars.height :eq (100)
-  )
+  Object.new("box", { "initLayout", "draw" }, { "boxLayout", "boxDraw" })
 
-  textview.style.background_color = style.dim
-
-  local child = View()
-  child:add_constraint(
-    child.vars.top :eq (0),
-    child.vars.left :eq (0),
-    child.vars.width :eq (20),
-    child.vars.height :eq (47)
-  )
-  textview:add_child(child)
-
-  local container = TextContainer(textview)
-
-  manager:addContainer(container)
-
-  local textview2 = TextView()
-  textview2:add_constraint(
-    textview2.vars.top :eq (300),
-    textview2.vars.left :eq (300),
-    textview2.vars.width :eq (150),
-    textview2.vars.height :eq (100)
-  )
-  
-  textview2.style.background_color = style.dim
-
-  local container2 = TextContainer(textview2)
-
-  manager:addContainer(container2)
-
-  core.solver:update()
-  manager:layout()
-
-  core.root_view:add_child(textview2)
-  core.root_view:add_child(textview)
-
-  core.active_view = core.root_view
-  core.add_thread(simulation.thread)
-  core.redraw = true
-end
-
-
-function core.quit(force)
-  if force then
-    os.exit()
-  end
-  core.quit(true)
+  core.box = Object.create('box')
 end
 
 
@@ -111,24 +55,6 @@ function core.add_thread(f, weak_ref)
   local key = weak_ref or #core.threads + 1
   local fn = function() return core.try(f) end
   core.threads[key] = { cr = coroutine.create(fn), wake = 0 }
-end
-
-
-function core.push_clip_rect(x, y, w, h)
-  local x2, y2, w2, h2 = table.unpack(core.clip_rect_stack[#core.clip_rect_stack])
-  local r, b, r2, b2 = x+w, y+h, x2+w2, y2+h2
-  x, y = math.max(x, x2), math.max(y, y2)
-  b, r = math.min(b, b2), math.min(r, r2)
-  w, h = r-x, b-y
-  table.insert(core.clip_rect_stack, { x, y, w, h })
-  renderer.set_clip_rect(x, y, w, h)
-end
-
-
-function core.pop_clip_rect()
-  table.remove(core.clip_rect_stack)
-  local x, y, w, h = table.unpack(core.clip_rect_stack[#core.clip_rect_stack])
-  renderer.set_clip_rect(x, y, w, h)
 end
 
 
@@ -195,29 +121,6 @@ function core.on_event(type, ...)
 end
 
 
-function core.step()
-  local width, height = renderer.get_size()
-
-  -- update
-  core.solver:suggest(core.root_view.vars.width, width)
-  core.solver:suggest(core.root_view.vars.height, height)
-  core.solver:update()
-  core.root_view:update()
-  if not core.redraw then
-    if not system.window_has_focus() then system.wait_event(0.5) end
-    return
-  end
-  core.redraw = false
-
-  -- draw
-  renderer.begin_frame()
-  core.clip_rect_stack[1] = { 0, 0, width, height }
-  renderer.set_clip_rect(table.unpack(core.clip_rect_stack[1]))
-  core.root_view:draw()
-  renderer.end_frame()
-end
-
-
 local run_threads = coroutine.wrap(function()
   while true do
     local max_time = 1 / config.fps - 0.004
@@ -253,7 +156,6 @@ end)
 function core.run()
   while true do
     core.frame_start = system.get_time()
-    core.step()
     run_threads()
     local elapsed = system.get_time() - core.frame_start
     system.sleep(math.max(0, 1 / config.fps - elapsed))

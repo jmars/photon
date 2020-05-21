@@ -10,13 +10,6 @@ local Object = require "core.object"
 local View = Object:extend()
 
 
-local count = 0
-local function inc()
-  count = count + 1
-  return count
-end
-
-
 function View:new()
   local S = core.solver
 

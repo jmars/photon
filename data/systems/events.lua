@@ -26,18 +26,19 @@ function events.init()
   events.objects = {}
 
   for i=1,#events.triggers do
-    local trigger = triggers[i]
+    local trigger = events.triggers[i]
     events.objects[trigger] = setmetatable({}, weakMT)
   end
 
-  events.thread = coroutine.create(events.hit_test_thread)
-  coroutine.resume(events.thread, 0, 0)
+  events.hit_test_thread = coroutine.create(events.hit_test_thread)
+  coroutine.resume(events.hit_test_thread, 0, 0)
 end
 
 
 local function hit_test(x, y, obj)
   local vl, vt = obj.vars.left:value(), obj.vars.top:value()
   local vr, vb = obj.vars.right:value(), obj.vars.bottom:value()
+
   return x >= vl and x <= vr and y >= vt and y <= vb
 end
 
@@ -67,12 +68,12 @@ end
 
 function events.on_mouse_pressed(button, x, y, clicks)
   for i=1,2 do
-    local event = i == 1 and "on_mouse_pressed" or "global_on_mouse_pressed"
-    local _, obj = coroutine.resume(events.thread, event, x, y)
+    local event = i == 1 and "mouse_pressed" or "global_mouse_pressed"
+    local _, obj = coroutine.resume(events.hit_test_thread, event, x, y)
 
     while obj ~= nil do
       Object.trigger(obj, event, button, x, y, clicks)
-      _, obj = coroutine.resume(events.thread, x, y)
+      _, obj = coroutine.resume(events.hit_test_thread, x, y)
     end
   end
 end
@@ -80,12 +81,12 @@ end
 
 function events.on_mouse_released(button, x, y)
   for i=1,2 do
-    local event = i == 1 and "on_mouse_released" or "global_on_mouse_released"
-    local _, obj = coroutine.resume(events.thread, event, x, y)
+    local event = i == 1 and "mouse_released" or "global_mouse_released"
+    local _, obj = coroutine.resume(events.hit_test_thread, event, x, y)
 
     while obj ~= nil do
       Object.trigger(obj, event, button, x, y)
-      _, obj = coroutine.resume(events.thread, x, y)
+      _, obj = coroutine.resume(events.hit_test_thread, x, y)
     end
   end
 end
@@ -93,12 +94,12 @@ end
 
 function events.on_mouse_moved(x, y, dx, dy)
   for i=1,2 do
-    local event = i == 1 and "on_mouse_moved" or "global_on_mouse_moved"
-    local _, obj = coroutine.resume(events.thread, event, x, y)
+    local event = i == 1 and "mouse_moved" or "global_mouse_moved"
+    local _, obj = coroutine.resume(events.hit_test_thread, event, x, y)
     
     while obj ~= nil do
       Object.trigger(obj, event, x, y, dx, dy)
-      _, obj = coroutine.resume(events.thread, x, y)
+      _, obj = coroutine.resume(events.hit_test_thread, x, y)
     end
   end
 end
@@ -126,7 +127,7 @@ function events.on_event(type, ...)
   elseif type == "mousewheel" then
     events.on_mouse_wheel(...)
   elseif type == "quit" then
-    core.quit()
+    os.exit()
   end
 end
 
@@ -153,7 +154,7 @@ end
 
 function events.thread()
   while true do
-    events.step()
+    local status, err = pcall(events.step)
     coroutine.yield(frameRate)
   end
 end

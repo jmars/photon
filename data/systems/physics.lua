@@ -42,16 +42,19 @@ function simulation.register(trigger, obj)
   local width = obj.layout.vars.width
   local height = obj.layout.vars.height
   local mass = S:var (num .. "mass")
+
   table.insert(
     obj.layout.constraints,
     mass :eq (width + height) :strength "required"
   )
+
   obj.physics = {
     mass = mass,
     velocity = { x = 0, y = 0 },
     restitution = -0.7,
     animating = false
   }
+
   table.insert(simulation.objects, obj)
 end
 
