@@ -13,7 +13,7 @@ function Object.tag_behaviours(name, behaviours)
 end
 
 
-function Object.new(name, triggers, behaviours, tags)
+function Object.define(name, triggers, behaviours, tags)
   local obj = {
     tags = tags or {},
     triggers = triggers,
@@ -77,9 +77,42 @@ function Object.trigger(obj, event, ...)
   end
 end
 
+local builder = {}
 
-function Object:__call(name, triggers, behaviours, init)
-  return self.new(name, triggers, behaviours, init)
+function builder:behaviours(list)
+  self.behaviours = list
+  return self
+end
+
+function builder:name(name)
+  self.name = name
+  return self
+end
+
+function builder:triggers(list)
+  self.triggers = list
+  return self
+end
+
+function builder:tags(list)
+  self.tags = list
+  return self
+end
+
+function builder:define()
+  return Object.define(
+    type(self.name) == 'string' and self.name or error("Must give objects a name"),
+    type(self.triggers) == 'table' and self.triggers or {},
+    type(self.behaviours) == 'table' and self.behaviours or {},
+    type(self.tags) == 'table' and self.tags or {}
+  )
+end
+
+builder.__index = builder
+
+function Object:__call(name, triggers, behaviours, tags)
+  if name == nil then return setmetatable({}, builder) end
+  return self.create(name, triggers, behaviours, tags)
 end
 
 

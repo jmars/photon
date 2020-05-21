@@ -54,13 +54,13 @@ function core.init()
     S:suggest(vars.top, y, "required")
   end)
 
-  Object.new(
-    "box",
-    { "initLayout", "draw", "global_mouse_moved" },
-    { "boxRender", "followMouse" }
-  )
+  Object()
+    :name "box"
+    :triggers { "initLayout", "draw", "global_mouse_moved" }
+    :behaviours { "boxRender", "followMouse" }
+    :define()
 
-  Object.create('box')
+  Object 'box'
 end
 
 
