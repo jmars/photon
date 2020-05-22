@@ -10,6 +10,7 @@ local layout = require 'systems.layout'
 local physics = require 'systems.physics'
 local render = require 'systems.render'
 local teardown = require 'systems.teardown'
+local observer = require 'systems.observer'
 
 local Object = require 'core.object'
 
@@ -22,6 +23,8 @@ function core.init()
   Object.register_system(events)
   Object.register_system(layout)
   Object.register_system(physics)
+  Object.register_system(observer)
+  Object.register_system(teardown)
 
   --renderer.show_debug(true)
   core.frame_start = 0
@@ -31,6 +34,8 @@ function core.init()
   core.add_thread(events.thread)
   core.add_thread(layout.thread)
   core.add_thread(physics.thread)
+  core.add_thread(observer.thread)
+  core.add_thread(teardown.thread)
 
   Object.behaviour("boxRender", { "initLayout", "draw" }, function(obj, _, S, addConstraint)
     if _ == "initLayout" then
@@ -54,10 +59,13 @@ function core.init()
     S:suggest(vars.top, y, "required")
   end)
 
+  Object.tag_behaviours("whitebox", { "boxRender" })
+
   Object()
     :name "box"
     :triggers { "initLayout", "draw", "global_mouse_moved" }
-    :behaviours { "boxRender", "followMouse" }
+    :behaviours { "followMouse" }
+    :tags { "whitebox" }
     :define()
 
   Object 'box'

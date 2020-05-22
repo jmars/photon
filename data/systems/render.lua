@@ -10,6 +10,7 @@ local frameRate = 1/60
 
 render.triggers = { "draw" }
 
+
 function render.push_clip_rect(x, y, w, h)
   local x2, y2, w2, h2 = table.unpack(render.clip_rect_stack[#render.clip_rect_stack])
   local r, b, r2, b2 = x+w, y+h, x2+w2, y2+h2

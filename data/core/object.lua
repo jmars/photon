@@ -15,6 +15,7 @@ end
 
 function Object.define(name, triggers, behaviours, tags)
   local obj = {
+    name = name,
     tags = tags or {},
     triggers = triggers,
     behaviours = behaviours
