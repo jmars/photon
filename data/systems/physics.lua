@@ -9,6 +9,13 @@ local function almostEqual(a, b)
 end
 
 
+local count = 0
+local function inc()
+  count = count + 1
+  return count
+end
+
+
 local simulation = {}
 
 
@@ -38,15 +45,19 @@ function simulation.register(trigger, obj)
     error("Physics: object must have layout")
   end
 
+  local num = inc()
   local S = obj.layout.solver
   local width = obj.layout.vars.width
   local height = obj.layout.vars.height
   local mass = S:var (num .. "mass")
+  local constraint = mass :eq (width + height) :strength "required"
 
   table.insert(
     obj.layout.constraints,
-    mass :eq (width + height) :strength "required"
+    constraint
   )
+
+  S:addconstraint(constraint)
 
   obj.physics = {
     mass = mass,

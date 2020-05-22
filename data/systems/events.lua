@@ -67,27 +67,31 @@ end
 
 
 function events.on_mouse_pressed(button, x, y, clicks)
-  for i=1,2 do
-    local event = i == 1 and "mouse_pressed" or "global_mouse_pressed"
-    local _, obj = coroutine.resume(events.hit_test_thread, event, x, y)
+  local _, obj = coroutine.resume(events.hit_test_thread, "mouse_pressed", x, y)
+  
+  while obj ~= nil do
+    Object.trigger(obj, "mouse_pressed", x, y, clicks)
+    _, obj = coroutine.resume(events.hit_test_thread, "mouse_pressed", x, y)
+  end
 
-    while obj ~= nil do
-      Object.trigger(obj, event, button, x, y, clicks)
-      _, obj = coroutine.resume(events.hit_test_thread, x, y)
-    end
+  for i=1,#events.objects.global_mouse_pressed do
+    local obj = events.objects.global_mouse_pressed[i]
+    Object.trigger(obj, "global_mouse_pressed", x, y, clicks)
   end
 end
 
 
 function events.on_mouse_released(button, x, y)
-  for i=1,2 do
-    local event = i == 1 and "mouse_released" or "global_mouse_released"
-    local _, obj = coroutine.resume(events.hit_test_thread, event, x, y)
+  local _, obj = coroutine.resume(events.hit_test_thread, "mouse_released", x, y)
+  
+  while obj ~= nil do
+    Object.trigger(obj, "mouse_released", x, y)
+    _, obj = coroutine.resume(events.hit_test_thread, "mouse_released", x, y)
+  end
 
-    while obj ~= nil do
-      Object.trigger(obj, event, button, x, y)
-      _, obj = coroutine.resume(events.hit_test_thread, x, y)
-    end
+  for i=1,#events.objects.global_mouse_released do
+    local obj = events.objects.global_mouse_released[i]
+    Object.trigger(obj, "global_mouse_released", x, y)
   end
 end
 
@@ -97,7 +101,7 @@ function events.on_mouse_moved(x, y, dx, dy)
   
   while obj ~= nil do
     Object.trigger(obj, "mouse_moved", x, y, dx, dy)
-    _, obj = coroutine.resume(events.hit_test_thread, x, y)
+    _, obj = coroutine.resume(events.hit_test_thread, "mouse_moved", x, y)
   end
 
   for i=1,#events.objects.global_mouse_moved do

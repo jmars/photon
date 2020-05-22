@@ -36,6 +36,7 @@ function Object.register_system(system)
 end
 
 
+-- TODO: isolate state between behaviours to force correct composition
 function Object.create(name)
   local obj = setmetatable({}, objects[name])
   table.insert(instances[name], obj)

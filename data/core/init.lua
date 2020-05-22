@@ -37,35 +37,75 @@ function core.init()
   core.add_thread(observer.thread)
   core.add_thread(teardown.thread)
 
-  Object.behaviour("boxRender", { "initLayout", "draw" }, function(obj, _, S, addConstraint)
-    if _ == "initLayout" then
-      local vars = obj.layout.vars
-      addConstraint(obj, vars.left :eq (0) :strength "weak")
-      addConstraint(obj, vars.top :eq (0) :strength "weak")
-      addConstraint(obj, vars.width :eq (100))
-      addConstraint(obj, vars.height :eq (100))
-    else
-      local vars = obj.layout.vars
-      local x, y = vars.left:value(), vars.top:value()
-      local w, h = vars.width:value(), vars.height:value()
-      renderer.draw_rect(x, y, w, h, style.background)
-    end
+  Object.behaviour(
+    "boxRender",
+    { "initLayout", "draw" },
+    function(obj, _, S, addConstraint)
+      if _ == "initLayout" then
+        local vars = obj.layout.vars
+        addConstraint(obj, vars.left :eq (0) :strength "weak")
+        addConstraint(obj, vars.top :eq (0) :strength "weak")
+        addConstraint(obj, vars.width :eq (100))
+        addConstraint(obj, vars.height :eq (100))
+      else
+        local vars = obj.layout.vars
+        local x, y = vars.left:value(), vars.top:value()
+        local w, h = vars.width:value(), vars.height:value()
+        renderer.draw_rect(x, y, w, h, style.background)
+      end
   end)
 
-  Object.behaviour("followMouse", { "global_mouse_moved" }, function(obj, _, x, y, dx, dy)
-    local vars = obj.layout.vars
-    local S = obj.layout.solver
-    S:suggest(vars.left, x, "required")
-    S:suggest(vars.top, y, "required")
-  end)
+  Object.behaviour(
+    "throwable",
+    { 
+      "global_mouse_moved",
+      "mouse_pressed",
+      "global_mouse_released",
+      "physics"
+    },
+    function(obj, _, x, y, dx, dy)
+      local vars = obj.layout.vars
 
-  Object.tag_behaviours("whitebox", { "boxRender" })
+      if _ == "mouse_pressed" then
+        obj.anchorX = x - vars.left:value()
+        obj.anchorY = y - vars.top:value()
+        obj.dragging = true
+      end
+
+      if _ == "global_mouse_released" then
+        obj.dragging = false
+        obj.physics.animating = true
+      end
+      
+      local S = obj.layout.solver
+
+      if _ == "global_mouse_moved" then
+        if not obj.dragging then return end
+
+        obj.physics.velocity.x = x - obj.anchorX - vars.left:value()
+        obj.physics.velocity.y = y - obj.anchorY - vars.top:value()
+
+        S:suggest(vars.left, x - obj.anchorX, "required")
+        S:suggest(vars.top, y - obj.anchorY, "required")
+      end
+
+      if _ == "physics" then
+        S:suggest(vars.left, x, "required")
+        S:suggest(vars.top, y, "required")
+      end
+  end)
 
   Object()
     :name "box"
-    :triggers { "initLayout", "draw", "global_mouse_moved" }
-    :behaviours { "followMouse" }
-    :tags { "whitebox" }
+    :triggers {
+      "initLayout",
+      "draw",
+      "global_mouse_moved",
+      "global_mouse_released",
+      "mouse_pressed",
+      "physics"
+    }
+    :behaviours { "throwable", "boxRender" }
     :define()
 
   Object 'box'
