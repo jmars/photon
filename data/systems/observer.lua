@@ -10,9 +10,6 @@ local observer = {}
 observer.triggers = { "select" }
 
 
-local Object
-
-
 local function contains(v, t)
   for i=1,#t do
     if t[i] == v then
@@ -60,7 +57,6 @@ end
 
 
 function observer.init()
-  Object = require 'core.object'
   observer.selects = setmetatable({}, { __mode = 'v' })
   observer.create = Object.create
 

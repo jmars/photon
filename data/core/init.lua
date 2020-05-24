@@ -11,6 +11,7 @@ local physics = require 'systems.physics'
 local render = require 'systems.render'
 local teardown = require 'systems.teardown'
 local observer = require 'systems.observer'
+local motion = require 'systems.motion'
 
 local Object = require 'core.object'
 
@@ -25,6 +26,7 @@ function core.init()
   Object.register_system(physics)
   Object.register_system(observer)
   Object.register_system(teardown)
+  Object.register_system(motion)
 
   --renderer.show_debug(true)
   core.frame_start = 0
@@ -36,6 +38,7 @@ function core.init()
   core.add_thread(physics.thread)
   core.add_thread(observer.thread)
   core.add_thread(teardown.thread)
+  core.add_thread(motion.thread)
 
   Object.behaviour(
     "boxRender",
@@ -61,7 +64,7 @@ function core.init()
       "global_mouse_moved",
       "mouse_pressed",
       "global_mouse_released",
-      "physics"
+      "physicsUpdate"
     },
     function(obj, _, x, y, dx, dy)
       local vars = obj.layout.vars
@@ -89,10 +92,36 @@ function core.init()
         S:suggest(vars.top, y - obj.anchorY, "required")
       end
 
-      if _ == "physics" then
+      if _ == "physicsUpdate" then
         S:suggest(vars.left, x, "required")
         S:suggest(vars.top, y, "required")
       end
+  end)
+
+  local Spring = require 'physics.spring'
+
+  Object.behaviour("test", { "initMotion", "motionViolation" }, function(obj, _, a, b, c)
+    if _ == "initMotion" then
+      local constraint, addConstraint = a, b
+      local vars = obj.layout.vars
+      addConstraint(constraint(vars.right) :lt (400))
+      return
+    end
+
+    local var, target, delta = a, b, c
+
+    local S = obj.layout.solver
+    obj.physics.animating = false
+    local mass = obj.physics.mass:value()
+
+    if obj.motion.spring == nil then
+      obj.motion.spring = Spring()
+      obj.motion.spring:snap(-var:value())
+      obj.motion.spring:setEnd(target, delta)
+      S:suggest(var, obj.motion.spring:x())
+    else
+      S:suggest(var, obj.motion.spring:x())
+    end
   end)
 
   Object()
@@ -103,9 +132,11 @@ function core.init()
       "global_mouse_moved",
       "global_mouse_released",
       "mouse_pressed",
-      "physics"
+      "physicsUpdate",
+      "initMotion",
+      "motionViolation"
     }
-    :behaviours { "throwable", "boxRender" }
+    :behaviours { "throwable", "boxRender", "test" }
     :define()
 
   Object 'box'

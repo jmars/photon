@@ -79,27 +79,33 @@ function Object.trigger(obj, event, ...)
   end
 end
 
+
 local builder = {}
+
 
 function builder:behaviours(list)
   self.behaviours = list
   return self
 end
 
+
 function builder:name(name)
   self.name = name
   return self
 end
+
 
 function builder:triggers(list)
   self.triggers = list
   return self
 end
 
+
 function builder:tags(list)
   self.tags = list
   return self
 end
+
 
 function builder:define()
   return Object.define(
@@ -110,7 +116,9 @@ function builder:define()
   )
 end
 
+
 builder.__index = builder
+
 
 function Object:__call(name, triggers, behaviours, tags)
   if name == nil then return setmetatable({}, builder) end

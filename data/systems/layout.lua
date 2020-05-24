@@ -34,48 +34,50 @@ end
 
 
 function layout.register(trigger, obj)
-  local S = layout.solver
+  if trigger == 'initLayout' then
+    local S = layout.solver
 
-  local num = inc()
-  local left = S:var (num .. "left")
-  local top = S:var (num .. "top")
-  local right = S:var (num .. "right")
-  local bottom = S:var (num .. "bottom")
-  local width = S:var (num .. "width")
-  local height = S:var (num .. "height")
-  local centerX = S:var (num .. "centerX")
-  local centerY = S:var (num .. "centerY")
+    local num = inc()
+    local left = S:var (num .. "left")
+    local top = S:var (num .. "top")
+    local right = S:var (num .. "right")
+    local bottom = S:var (num .. "bottom")
+    local width = S:var (num .. "width")
+    local height = S:var (num .. "height")
+    local centerX = S:var (num .. "centerX")
+    local centerY = S:var (num .. "centerY")
 
-  local constraints = {
-    width :eq (right - left) :strength "required",
-    height :eq (bottom - top) :strength "required",
-    centerX :eq (left + (width / 2)) :strength "required",
-    centerY :eq (top + (height / 2)) :strength "required",
-    S:constraint()(left) "<=" (right) :strength "required",
-    S:constraint()(top) "<=" (bottom) :strength "required"
-  }
+    local constraints = {
+      width :eq (right - left) :strength "required",
+      height :eq (bottom - top) :strength "required",
+      centerX :eq (left + (width / 2)) :strength "required",
+      centerY :eq (top + (height / 2)) :strength "required",
+      S:constraint()(left) "<=" (right) :strength "required",
+      S:constraint()(top) "<=" (bottom) :strength "required"
+    }
 
-  for i=1,#constraints do
-    S:addconstraint(constraints[i])
+    for i=1,#constraints do
+      S:addconstraint(constraints[i])
+    end
+
+    obj.layout = {
+      vars = {
+        left = left,
+        top = top,
+        right = right,
+        bottom = bottom,
+        width = width,
+        height = height,
+        centerX = centerX,
+        centerY = centerY
+      },
+      constraints = constraints,
+      solver = S
+    }
+
+    table.insert(layout.objects, obj)
+    Object.trigger(obj, "initLayout", S, addConstraint)
   end
-
-  obj.layout = {
-    vars = {
-      left = left,
-      top = top,
-      right = right,
-      bottom = bottom,
-      width = width,
-      height = height,
-      centerX = centerX,
-      centerY = centerY
-    },
-    constraints = constraints,
-    solver = S
-  }
-
-  table.insert(layout.objects, obj)
-  Object.trigger(obj, "initLayout", S, addConstraint)
 end
 
 

@@ -15,3 +15,6 @@ pulled out for building small apps. With the goal of putting together simple con
 * Script to build self contained app
 * Networking
 * Example HN reader app
+* Profile math and follow http://wiki.luajit.org/Numerical-Computing-Performance-Guide
+* Move native functions to FFI
+* Move as much numerical code as possible to C

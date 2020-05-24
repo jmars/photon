@@ -30,7 +30,7 @@ local k = -30 -- Spring stiffness, in kg / s^2
 local b = -30 -- Damping constant, in kg / s
 
 
-simulation.triggers = { "physics" }
+simulation.triggers = { "physicsUpdate" }
 
 
 function simulation.init()
@@ -127,7 +127,7 @@ function simulation.step()
     local newLeft = left + (velocity.x * frameRate * 100)
     local newTop = top + (velocity.y * frameRate * 100)
 
-    Object.trigger(obj, "physics", newLeft, newTop)
+    Object.trigger(obj, "physicsUpdate", newLeft, newTop)
     
     ::skip::
   end
