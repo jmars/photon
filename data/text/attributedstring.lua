@@ -1,4 +1,4 @@
-local Object = require 'core.object'
+local Object = require 'core.class'
 local RangeEntry = require 'text.rangeentry'
 
 

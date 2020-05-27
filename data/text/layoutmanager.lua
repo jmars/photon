@@ -1,4 +1,4 @@
-local Object = require 'core.object'
+local Object = require 'core.class'
 local style = require 'core.style'
 local fontloader = require 'text.fontloader'
 
